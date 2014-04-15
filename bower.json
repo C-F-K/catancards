@@ -1,0 +1,20 @@
+{
+  "name": "ast-server",
+  "version": "0.0.0",
+  "homepage": "https://github.com/C-F-K/ast-server",
+  "authors": [
+    "C-F-K <a.fell.ninny.mocker@gmail.com>"
+  ],
+  "description": "C. Kelly - AST Server",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "~0.2.2"
+  }
+}
