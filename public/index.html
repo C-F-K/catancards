@@ -13,11 +13,19 @@
   <body>
     <script>
 		var disCount = new Firebase('https://discount-app.firebaseio.com/');
+      	var newposxleft = 0;
+      	var newposxright = 0;
+      	var newposyup = 0;
+      	var newposydown = 0;
 		disCount.on('value',function(snapshot){
 			if (snapshot.val() === null) {
 				console.log("no user yet");
 			} else {
 				console.log("position is " + snapshot.val().user.posx + "," + snapshot.val().user.posy);
+				newposxleft = snapshot.val().user.posx--;
+				newposxright = snapshot.val().user.posx++;
+				newposyup = snapshot.val().user.posy--;
+				newposydown = snapshot.val().user.posy++;
 			}
 		});
 		$(document).ready(function(){
@@ -39,23 +47,26 @@
 						//left
 						//need to read the current state of the position variables (ie. locations in firebase) to know what to modify
 						//after that, modifying is not so much an issue as the current value can just be overwritten with set
-						disCount.child('user').child('posx').set((parseInt(disCount.child('user').child('posx'),10)) - 1);
+                    	//on.value, create 4 variables with the value to which the pos will be set after keydown?
+                    	//and then on.keydown, actually do it?
+                    	//should work now
+						disCount.child('user').child('posx').set(newposxleft);
 						//$('img').animate({left: "-=10px"}, 'fast');
 						break;
 					case 40:
 						//down
-						disCount.child('user').child('posy').set((parseInt(disCount.child('user').child('posy'),10)) + 1);
+						disCount.child('user').child('posy').set(newposydown);
 						//$('img').animate({top: "+=10px"}, 'fast');
 						break;
 					case 38:
 						//up
-						disCount.child('user').child('posy').set((parseInt(disCount.child('user').child('posy'),10)) - 1);
+						disCount.child('user').child('posy').set(newposyup);
 						//$('img').animate({top: "-=10px"}, 'fast');
 						break;
 					case 39:
 						//right
 						
-						disCount.child('user').child('posx').set((parseInt(disCount.child('user').child('posx'),10)) + 1);
+						disCount.child('user').child('posx').set(newposxright);
 						//$('img').animate({left: "+=10px"}, 'fast');
 						break;
 					default:
