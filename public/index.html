@@ -22,10 +22,14 @@
 				console.log("no user yet");
 			} else {
 				console.log("position is " + snapshot.val().user.posx + "," + snapshot.val().user.posy);
-				newposxleft = snapshot.val().user.posx--;
-				newposxright = snapshot.val().user.posx++;
-				newposyup = snapshot.val().user.posy--;
-				newposydown = snapshot.val().user.posy++;
+				newposxleft = snapshot.val().user.posx;
+				newposxleft--;
+				newposxright = snapshot.val().user.posx;
+				newposxright++;
+				newposyup = snapshot.val().user.posy;
+				newposyup--;
+				newposydown = snapshot.val().user.posy;
+				newposydown++;
 			}
 		});
 		$(document).ready(function(){
