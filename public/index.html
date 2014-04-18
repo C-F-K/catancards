@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>C. Kelly - AST Server</title>
     <link rel="stylesheet" href="styles.css">
+	<script type="text/javascript" src="bower_components/platform/platform.js"></script>
+	<link rel="import" href="elements/custom-element.html">
     <script type="text/javascript" src="app.js"></script>
 	<script type="text/javascript" src="./vendor/d3.js"></script>
 	<script type="text/javascript" src="./vendor/handlebars-v1.3.0.js"></script>
@@ -36,7 +38,7 @@
 			$('#submit').on('click',function(){
 				disCount.set({user: {char: $('#char').val(), posx: 0, posy: 0}}, function(error) {
 					if (error) {
-						alert('char not saved' + error);
+						alert('char not saved ' + error);
 					} else {
 						alert('char saved');
 					}
