@@ -1,0 +1,17 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="spoiler-alert">
+	<template>
+		<span id="spoilers" on-click="{{ hideToggle }}"><content></content></span>
+	</template>
+	<script>
+		Polymer('spoiler-alert', {
+			ready: function() {
+				$(this.$.spoilers).slideUp;
+			},
+			hideToggle: function() {
+				$(this.$).slideToggle;
+			}
+		});
+	</script>
+</polymer-element>
