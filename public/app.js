@@ -89,6 +89,7 @@ $(document).ready(function(){
 				//$('img').animate({left: "+=10px"}, 'fast');
 				break;
 			case 82:
+				// press 'r' to attempt to write roomContents to room div
 				concreteRoom();
 			default:
 				break;
