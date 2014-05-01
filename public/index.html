@@ -5,92 +5,26 @@
     <title>C. Kelly - AST Server</title>
     <link rel="stylesheet" href="styles.css">
 	<script src="./bower_components/platform/platform.js"></script>
+	<script type="text/javascript" src="./vendor/jquery-2.1.0.js"></script>
 	<link rel="import" href="./elements/spoiler-alert.html">
-    <script type="text/javascript" src="app.js"></script>
 	<script type="text/javascript" src="./vendor/d3.js"></script>
 	<script type="text/javascript" src="./vendor/handlebars-v1.3.0.js"></script>
-	<script type="text/javascript" src="./vendor/jquery-2.1.0.js"></script>
 	<script type="text/javascript" src="./vendor/firebase.js"></script>
+	<script type="text/javascript" src="app.js"></script>
+	
 	<style>
 		:unresolved {
 			opacity: 0;
 		}
 	</style>
   </head>
-
   <body>
-    <script>
-		var disCount = new Firebase('https://discount-app.firebaseio.com/');
-      	var newposxleft = 0;
-      	var newposxright = 0;
-      	var newposyup = 0;
-      	var newposydown = 0;
-		disCount.on('value',function(snapshot){
-			if (snapshot.val() === null) {
-				console.log("no user yet");
-			} else {
-				console.log("position is " + snapshot.val().user.posx + "," + snapshot.val().user.posy);
-				newposxleft = snapshot.val().user.posx;
-				newposxleft--;
-				newposxright = snapshot.val().user.posx;
-				newposxright++;
-				newposyup = snapshot.val().user.posy;
-				newposyup--;
-				newposydown = snapshot.val().user.posy;
-				newposydown++;
-			}
-		});
-		$(document).ready(function(){
-			$('#submit').on('click',function(){
-				disCount.set({user: {char: $('#char').val(), posx: 0, posy: 0}}, function(error) {
-					if (error) {
-						alert('char not saved ' + error);
-					} else {
-						alert('char saved');
-					}
-				});
-			});
-//			$(document).keyup(function (e) {
-//				alert(e.keyCode);
-//			});
-			$(document).keydown(function(key) {
-				switch(parseInt(key.which,10)) {
-					case 37:
-						//left
-						//need to read the current state of the position variables (ie. locations in firebase) to know what to modify
-						//after that, modifying is not so much an issue as the current value can just be overwritten with set
-                    	//on.value, create 4 variables with the value to which the pos will be set after keydown?
-                    	//and then on.keydown, actually do it?
-                    	//should work now
-						disCount.child('user').child('posx').set(newposxleft);
-						//$('img').animate({left: "-=10px"}, 'fast');
-						break;
-					case 40:
-						//down
-						disCount.child('user').child('posy').set(newposydown);
-						//$('img').animate({top: "+=10px"}, 'fast');
-						break;
-					case 38:
-						//up
-						disCount.child('user').child('posy').set(newposyup);
-						//$('img').animate({top: "-=10px"}, 'fast');
-						break;
-					case 39:
-						//right
-						
-						disCount.child('user').child('posx').set(newposxright);
-						//$('img').animate({left: "+=10px"}, 'fast');
-						break;
-					default:
-						break;
-				}
-			});
-		});
-	</script>
 	<h1>smoke crack and hail xenu</h1>
 	<input type="text" id="char"></input>
 	<button type="button" id="submit">Submit</button>
 	<br><br>
 	<spoiler-alert>Ned Stark dies</spoiler-alert>
+	<br><br>
+	<div class="room"></div>
   </body>
 </html>
