@@ -1,0 +1,15 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="discount-input" attributes="sentchar">
+	<template>
+		<input type="text" id="char"></input>
+		<button type="button" id="submit" on-click={{sendChar}}>Submit</button>
+	</template>
+	<script>
+		Polymer('discount-input', {
+			sendChar: function(){
+				this.sentchar = this.$.char.value;
+			}
+		});
+	</script>
+</polymer-element>

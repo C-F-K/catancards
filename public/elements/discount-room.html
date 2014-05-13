@@ -1,0 +1,49 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="./discount-input.html">
+<link rel="import" href="./discount-display.html">
+
+
+<polymer-element name="discount-room">
+	<template>
+		<discount-input sentchar="{{recvChar}}"></discount-input>
+		<discount-display></discount-display>
+	</template>
+	<script>
+		
+		Polymer('discount-room', {
+			ready: function() {
+				var disCount = new Firebase('https://discount-app.firebaseio.com/');
+				var newposxleft = 0;
+				var newposxright = 0;
+				var newposyup = 0;
+				var newposydown = 0;
+				var roomContents = [];
+				var roomRow = [];
+				var row = "";
+				var roomX = 0;
+				var roomY = 0;
+
+			},
+			recvCharChanged: function(recvChar) {
+				disCount.set(user: {char: recvChar, posx: 0, posy: 0}, function(error) {
+					if (error) {
+						alert('char not saved ' + error);
+					} else {
+						alert('char saved');
+					};
+				});
+			})	;
+	</script>
+</polymer-element>
+
+use core-ajax
+bower install Polymer/core-ajax --save
+
+<core-ajax 	url="firebase/etc/location.json"
+					method="GET"/"PUT"/"POST"
+					params=""
+					auto body="{{ data }}"
+					response="{{ resp }}">
+</core-ajax>
+
+bzzt nevermind, need Firebase API anyway because real-time

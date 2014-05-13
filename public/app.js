@@ -1,3 +1,5 @@
+
+/*
 var disCount = new Firebase('https://discount-app.firebaseio.com/');
 var newposxleft = 0;
 var newposxright = 0;
@@ -8,6 +10,8 @@ var roomRow = [];
 var row = "";
 var roomX = 0;
 var roomY = 0;
+*/
+
 disCount.on('value',function(snapshot){
 	if (snapshot.val() === null) {
 		console.log("no user yet");
