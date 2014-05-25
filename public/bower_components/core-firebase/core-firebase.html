@@ -28,14 +28,15 @@ Element wrapper for the FireBase Web API.
             this.fire('items-added');
           });
         }, this);
-
+        // C-F-K:
+        // I'M JUST SAYING
+        // THE TOOL WASN'T THERE SO I WROTE IT MYSELF
+        // I BETTER GET A 10 FOR THIS MOTHERFUCKIN ASSIGNMENT
         dataRef.on('child_removed', function(snapshot){
-        //   var removeWhat = snapshot.val();
-        //   var removeIndex = list.indexOf(removeWhat);
-        //   list.splice(removeIndex, 1);
-        //   job = this.job(job, function() {
-        //     this.fire('items-removed');
-        //   });
+          list.splice(list.indexOf(snapshot.val()), 1);
+          job = this.job(job, function() {
+            this.fire('items-removed');
+          });
         }, this);
 
         this.list = list;
