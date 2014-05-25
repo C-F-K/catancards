@@ -1,49 +1,68 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="./discount-input.html">
-<link rel="import" href="./discount-display.html">
-
+<link rel="import" href="../bower_components/core-firebase/core-firebase.html">
+<!-- <link rel="import" href="../bower_components/core-firebase/firebase-import.html"> -->
+<!-- <link rel="import" href="./discount-input.html">
+<link rel="import" href="./discount-display.html"> -->
 
 <polymer-element name="discount-room">
 	<template>
-		<discount-input sentchar="{{recvChar}}"></discount-input>
-		<discount-display></discount-display>
+		<core-firebase 	location="https://discount-app.firebaseio.com/" 
+						list="{{discount}}" 
+						on-items-added={{update}}
+						on-items-removed=((update))
+						id="firebase">
+		</core-firebase>
+		<!-- <discount-input></discount-input>
+		<discount-display></discount-display> -->
+		<input id="uchar" type="text"></input>
+		<button id="submit" on-click={{sendChar}}>Submit</button>
+		<button id="remove" on-click={{removeChar}}>Remove</button>
+		<hr>
+		<pre id="display"></pre>
 	</template>
 	<script>
-		
-		Polymer('discount-room', {
-			ready: function() {
-				var disCount = new Firebase('https://discount-app.firebaseio.com/');
-				var newposxleft = 0;
-				var newposxright = 0;
-				var newposyup = 0;
-				var newposydown = 0;
-				var roomContents = [];
-				var roomRow = [];
-				var row = "";
-				var roomX = 0;
-				var roomY = 0;
+		// from core-firebase/demo.html
+		// var $ = document.querySelector.bind(document);
+		// var fb = $('core-firebase');
+		// function update() {
+		// 	$('pre').innerHTML = JSON.stringify(fb.list);
+		// }
+		// fb.addEventListener('items-added', update);
+		// function add() {
+		// 	fb.add($('input').value);
+		// }
 
+
+
+		Polymer('discount-room', {
+			ready: function (){
+				console.log(this.discount);
 			},
-			recvCharChanged: function(recvChar) {
-				disCount.set(user: {char: recvChar, posx: 0, posy: 0}, function(error) {
-					if (error) {
-						alert('char not saved ' + error);
-					} else {
-						alert('char saved');
-					};
-				});
-			})	;
+			sendChar: function sendChar(){
+				console.log("before send");
+				console.log(this.discount);
+				chr = this.$.uchar.value;
+				this.$.firebase.push({uchar: chr, posx: 0, posy: 0});
+				console.log("after send");
+				console.log(this.discount);
+			},
+			update: function update(){
+				this.$.display.innerHTML = JSON.stringify(this.discount);
+			},
+			removeChar: function removeChar(){
+				console.log("before remove");
+				console.log(this.discount);
+				toRemove = this.$.uchar.value;
+				for (i = 0; i < this.discount.length; i++){
+					if (this.discount[i].uchar == toRemove){
+						this.$.firebase.remove(this.discount[i]);
+						this.discount.splice(i, 1);
+					}
+				}
+				console.log("after remove");
+				console.log(this.discount)
+			}
+
+		});
 	</script>
 </polymer-element>
-
-use core-ajax
-bower install Polymer/core-ajax --save
-
-<core-ajax 	url="firebase/etc/location.json"
-					method="GET"/"PUT"/"POST"
-					params=""
-					auto body="{{ data }}"
-					response="{{ resp }}">
-</core-ajax>
-
-bzzt nevermind, need Firebase API anyway because real-time

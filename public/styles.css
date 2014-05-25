@@ -1,8 +1,10 @@
 body {
 	font-family:courier;
+	color:white;
+	background-color: black;
 }
 
-.room {
+/* .room {
 	position:relative;
 	margin-left:auto;
 	margin-right:auto;
@@ -12,7 +14,7 @@ body {
 	max-width:60%;
 	min-height:50%;
 	max-height:50%;
-	border-color:#000000;
+	border-color:white;
 	border-style:double;
 	border-width:6px;
-}	
+}	*/
