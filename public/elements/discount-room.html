@@ -1,48 +1,37 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/core-firebase/core-firebase.html">
-<!-- <link rel="import" href="../bower_components/core-firebase/firebase-import.html"> -->
-<!-- <link rel="import" href="./discount-input.html">
-<link rel="import" href="./discount-display.html"> -->
+<link rel="import" href="../bower_components/firebase-element/firebase-element.html">
+<link rel="import" href="../bower_components/firebase-element/firebase-import.html">
 
 <polymer-element name="discount-room">
 	<template>
-		<core-firebase 	location="https://discount-app.firebaseio.com/" 
-						list="{{discount}}" 
-						on-items-added={{update}}
-						on-items-removed={{update}}
-						on-items-changed={{update}}
-						id="firebase">
-		</core-firebase>
-		<!-- <discount-input></discount-input>
-		<discount-display></discount-display> -->
+		<firebase-element 	id="firebase" 
+							location="https://discount-app.firebaseio.com/" 
+							data="{{data}}" 
+							keys="{{keys}}">
+		</firebase-element>
 		<input id="uchar" type="text"></input>
-		<button id="submit" on-click={{sendChar}}>Submit</button>
-		<button id="remove" on-click={{removeChar}}>Remove</button>
+		<button id="submit">Submit</button>
+		<button id="remove">Remove</button>
 		<hr>
-		<pre id="display"></pre>
+		<table>
+        	<template repeat="{{ rank in ranks }}">
+        	    <tr>
+        	        <template repeat="{{ file in files }}">
+        	            <td id="{{file}}{{rank}}">{{ space }}</td>
+        	        </template>
+    	        </tr>
+    	    </template>
+	    </table>
+		
 	</template>
 	<script>
 		Polymer('discount-room', {
 			ready: function (){
-				console.log(this.discount);
+				console.log(this.data + ":" + this.keys);
 			},
-			sendChar: function sendChar(){
-				chr = this.$.uchar.value;
-				this.$.firebase.push({uchar: chr, posx: 0, posy: 0});
-			},
-			update: function update(){
-				this.$.display.innerHTML = JSON.stringify(this.discount);
-			},
-			removeChar: function removeChar(){
-				toRemove = this.$.uchar.value;
-				for (i = 0; i < this.discount.length; i++){
-					if (this.discount[i].uchar == toRemove){
-						this.$.firebase.remove(this.discount[i]);
-						this.discount.splice(i, 1);
-					}
-				}
-			}
-
+			space: ".",
+			files: ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x"],
+			ranks: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
 		});
 	</script>
 </polymer-element>

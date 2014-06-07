@@ -76,6 +76,7 @@ Element wrapper for the FireBase Web API.
 
       remove: function(item) {
         // TODO(sjmiles): this is a really bad way of doing this
+        console.log("internal before remove: " + this.list);
         this.dataRef.once('value', function(snap) {
           snap.forEach(function(snap) {
             var rec = snap.val();
@@ -89,6 +90,7 @@ Element wrapper for the FireBase Web API.
             return true;
           }.bind(this));
         }, this);
+        console.log("internal after remove: " + this.list);
       },
 
       _removeFromList: function(item) {
