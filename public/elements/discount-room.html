@@ -7,31 +7,121 @@
 		<firebase-element 	id="firebase" 
 							location="https://discount-app.firebaseio.com/" 
 							data="{{data}}" 
-							keys="{{keys}}">
+							keys="{{keys}}"
+							log
+							childEvents
+							on-child-added="{{childAdded}}">
 		</firebase-element>
 		<input id="uchar" type="text"></input>
-		<button id="submit">Submit</button>
-		<button id="remove">Remove</button>
+		<button id="submit" on-click={{sendChar}}>Submit</button>
+		<button id="remove" on-click={{moveChar}}>Move</button>
 		<hr>
 		<table>
-        	<template repeat="{{ rank in ranks }}">
+			<!-- Unlike RFK, the room has to exist independently of a putative user's desire to enter it. -->
+			<!-- TODO: theoretical waffling on the ontology of the singleplayer/multiplayer binary -->
+        	<template repeat="{{ file in files }}">
         	    <tr>
-        	        <template repeat="{{ file in files }}">
+        	        <template repeat="{{ rank in ranks }}">
         	            <td id="{{file}}{{rank}}">{{ space }}</td>
         	        </template>
     	        </tr>
     	    </template>
 	    </table>
-		
 	</template>
 	<script>
+
+
 		Polymer('discount-room', {
-			ready: function (){
-				console.log(this.data + ":" + this.keys);
-			},
-			space: ".",
+			// observe: {
+			// 	data: 'dataChanged'
+			// },
+			ranks: [],
 			files: ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x"],
-			ranks: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+			newfileleft: 0,
+			newfileright: 0,
+			newrankup: 0,
+			newrankdown: 0,
+			occupied: [],
+			space: ".",
+
+			ready: function (){
+				// console.log(this.data + ":" + this.keys);
+				for (i = 0; i < 80; i++) {
+					this.ranks.push(i);
+				}
+			},
+
+			sendChar: function(){
+				var uchr = this.$.uchar.value;
+				this.$.firebase.push({
+					rank: Math.floor(Math.random() * this.ranks.length),
+					file: this.files[Math.floor(Math.random() * this.files.length)],
+					chr: uchr
+				});
+			},
+
+			childAdded: function(e){
+				var place = '#' + e.detail.value.file + e.detail.value.rank;
+				// console.log('placing ' + e.detail.value.chr + ' at ' + place);
+				this.shadowRoot.querySelector(place).innerHTML = e.detail.value.chr;	
+			},
+
+			update: function(e){
+
+			}
+
 		});
 	</script>
 </polymer-element>
+
+
+	$(document).keydown(function(key) {
+		switch(parseInt(key.which,10)) {
+			case 37:
+				//left
+				disCount.child('user').child('posx').set(newposxleft);
+				//$('img').animate({left: "-=10px"}, 'fast');
+				break;
+			case 40:
+				//down
+				disCount.child('user').child('posy').set(newposydown);
+				//$('img').animate({top: "+=10px"}, 'fast');
+				break;
+			case 38:
+				//up
+				disCount.child('user').child('posy').set(newposyup);
+				//$('img').animate({top: "-=10px"}, 'fast');
+				break;
+			case 39:
+				//right				
+				disCount.child('user').child('posx').set(newposxright);
+				//$('img').animate({left: "+=10px"}, 'fast');
+				break;
+			case 82:
+				// press 'r' to attempt to write roomContents to room div
+				concreteRoom();
+			default:
+				break;
+		}
+	});	
+});
+
+			dataChanged: function(snap){
+				console.log(snap);
+				if (snap.detail.value === null) {
+					console.log("no user yet");
+				} else {
+					for (key in snap.detail) {
+						var name = snap.detail.name;
+						console.log("position is " + snap.detail.value.name.file + "," + snap.detail.value.name.rank);
+						this.newposxleft = snap.detail.value.name.file;
+						this.newposxleft--;
+						this.newposxright = snap.detail.value.name.file;
+						this.newposxright++;
+						this.newposyup = snap.detail.value.name.rank;
+						this.newposyup--;
+						this.newposydown = snap.detail.value.name.rank;
+						this.newposydown++;
+					}
+				}
+			},
