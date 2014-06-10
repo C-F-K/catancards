@@ -47,7 +47,7 @@
 			<label>Name:</label> <input id="uname" type="text"></input><br>
 			<label>Character:</label>
 			<template repeat="{{ char in characters }}">
-				<span id="{{char}}" on-click="{{clickChar}}">{{char}}</span>
+				<span id="{{char}}" on-click={{clickChar}}>{{char}}</span>
 			</template>
 			<br>
 			<!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
@@ -126,8 +126,9 @@
 				}
 			},
 
-			clickChar: function() {
-				var select = this.shadowRoot.querySelector("")
+			clickChar: function(el) {
+				console.log(el.toElement.id);
+				var select = this.shadowRoot.querySelector("");
 				console.log(this.characters.indexOf(select));
 			},
 
@@ -138,23 +139,23 @@
 			},
 
 			sendChar: function(){
-				var uchr = this.$.uchar.value;
 				var unm = this.$.uname.value;
-				if (uchr == "" || unm == "") {
-					alert("Need a name and a character");
-				} else if (uchr.length > 1) {
-					alert("Need only one character")
+				var uchr = 
+				// var uchr = this.$.uchar.value;
+				// if (uchr == "" || unm == "") {
+				// 	alert("Need a name and a character");
+				// } else if (uchr.length > 1) {
+				// 	alert("Need only one character")
 				// } else if () {
-
 				// }
-				} else {
+				// } else {
 					this.$.firebase.push({
 						rank: Math.floor(Math.random() * this.ranks.length),
 						file: this.files[Math.floor(Math.random() * this.files.length)],
 						chr: uchr,
 						name: unm
 					});
-				}
+				// }
 			},
 
 			childAdded: function(e){
