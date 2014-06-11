@@ -5,6 +5,10 @@
 <polymer-element name="discount-room">
 	<template>
 		<style type="text/css">
+			#userconfig {
+				display: block;
+			} 
+
 			label { 
 			    display: inline-block; 
 			    width: 8.75em; 
@@ -46,6 +50,7 @@
 			    text-align: center;
 			    vertical-align: bottom;	
 			}
+
 		</style>
 			<firebase-element 	id="firebase" 
 								location="https://discount-app.firebaseio.com/" 
@@ -53,21 +58,24 @@
 								keys="{{keys}}"
 								log
 								childEvents
-								on-child-added="{{childAdded}}">
+								on-child-added={{childAdded}}
+								on-data-change={{update}}>
 			</firebase-element>
-			<label>Name:</label> <input id="uname" type="text"></input><br>
-			<label>Character:</label>
-			<div id="charblock">
-				<template repeat="{{ char in characters }}">
-					<span id="{{char.name}}" class="possiblechar" on-click={{clickChar}}>{{char.chr}}</span>
-				</template>
+			<div id="userconfig">
+				<label>Name:</label> <input id="uname" type="text"></input><br>
+				<label>Character:</label>
+				<div id="charblock">
+					<template repeat="{{ char in characters }}">
+						<span id="{{char.name}}" class="possiblechar" on-click={{clickChar}}>{{char.chr}}</span>
+					</template>
+				</div>
+				<br>
+				<!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+				<div id="buttoncontainer">
+					<button id="submit" on-click={{sendChar}}>Submit</button>
+				</div>
+				<!-- <button id="remove" on-click={{moveChar}}>Move</button> -->
 			</div>
-			<br>
-			<!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
-			<div id="buttoncontainer">
-				<button id="submit" on-click={{sendChar}}>Submit</button>
-			</div>
-			<!-- <button id="remove" on-click={{moveChar}}>Move</button> -->
 			<hr>
 			<table>
 				<!-- Unlike RFK, the room has to exist independently of a putative user's desire to enter it. -->
@@ -86,6 +94,7 @@
 			// observe: {
 			// 	data: 'dataChanged'
 			// },
+			registeredUser: "",
 			characters: [
 				{name:"a", chr:"a"}, 
 				{name:"b", chr:"b"}, 
@@ -274,36 +283,47 @@
 			sendChar: function(){
 				var unm = this.$.uname.value;
 				var uchr = this.selectedChar
-				// var uchr = this.$.uchar.value;
-				// if (uchr == "" || unm == "") {
-				// 	alert("Need a name and a character");
-				// } else if (uchr.length > 1) {
-				// 	alert("Need only one character")
-				// } else if () {
-				// }
-				// } else {
+				if (uchr == "" || unm == "") {
+					alert("Need a name and a character");
+				} else {
 					this.$.firebase.push({
 						rank: Math.floor(Math.random() * this.ranks.length),
 						file: this.files[Math.floor(Math.random() * this.files.length)],
 						chr: uchr,
 						name: unm
 					});
-				// }
+				}
+				this.shadowRoot.querySelector("#userconfig").style.display="none";
 			},
 
 			childAdded: function(e){
 				var place = '#' + e.detail.value.file + e.detail.value.rank;
 				// console.log('placing ' + e.detail.value.chr + ' at ' + place);
-				this.shadowRoot.querySelector(place).innerHTML = e.detail.value.chr;	
+				this.shadowRoot.querySelector(place).innerHTML = e.detail.value.chr;
+				
+				// if (this.registeredUser == "") {
+				// 	console.log("setting username to: " + e.detail.name);
+				// 	this.registeredUser = e.detail.name;
+
+				// } else {
+				// 	console.log("user already present");
+				// }
+				// console.log(e.detail.name);
+				// console.log(this.registeredUser);
+				// console.log(e.detail.value);
 			},
 
-			update: function(e){
-
+			update: function(p){
+				// console.log("fuck");
+				// console.log(p);
 			}
 
 		});
 	</script>
 </polymer-element>
+
+sendchar: disable user config part (above the HR)
+
 
 	$(document).keydown(function(key) {
 		switch(parseInt(key.which,10)) {
