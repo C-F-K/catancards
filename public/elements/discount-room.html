@@ -19,6 +19,17 @@
 				border: 1px solid white;
 			}
 
+			.singlecolor {
+				transition: opacity 1s;
+				-webkit-transition: opacity 1s;
+				-moz-transition: opacity 1s;
+				-o-transition: opacity 1s;
+				opacity: 0.9;
+				height: 24px;
+				width: 24px;
+				display: inline-block;
+				margin-right: 6px;
+			}
 			#submit {
 				display:inline-block;
 			}
@@ -27,11 +38,18 @@
 				display:inline-block;
 				width: 32em;
 				vertical-align: text-top;
+				padding-bottom:6px;
+			}
+
+			#colorblock {
+				display:inline-block;
+				width: 32em;
+				vertical-align: text-top;
 			}
 
 			#buttoncontainer {
 				display:inline-block;
-				margin-left: 8.75em;
+				margin-left: 9.2em;
 				margin-top: 0.5em;
 			}
 
@@ -46,28 +64,34 @@
 			td {
 			    width: 1.25%;
 			    height: 2.2em;
-			    /*border: 1px solid white;*/
 			    text-align: center;
 			    vertical-align: bottom;	
 			}
-
 		</style>
 			<firebase-element 	id="firebase" 
 								location="https://discount-app.firebaseio.com/" 
 								data="{{data}}" 
 								keys="{{keys}}"
 								log
-								childEvents
-								on-child-added={{childAdded}}
-								on-data-change={{update}}>
+								childEvents								
+								on-data-change={{update}}
+								on-child-added={{childAdded}}>
 			</firebase-element>
 			<div id="userconfig">
-				<label>Name:</label> <input id="uname" type="text"></input><br>
+				<label>Name:</label> 
+				<input id="uname" type="text"></input><br>
 				<label>Character:</label>
 				<div id="charblock">
 					<template repeat="{{ char in characters }}">
 						<span id="{{char.name}}" class="possiblechar" on-click={{clickChar}}>{{char.chr}}</span>
 					</template>
+				</div><br>
+				<label>Color:</label>
+				<div id="colorblock">
+					<template repeat="{{ color in palette }}">
+						<div class="singlecolor" id="{{color}}" on-click={{fadeOthers}}></div>
+					</template>
+
 				</div>
 				<br>
 				<!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
@@ -94,7 +118,6 @@
 			// observe: {
 			// 	data: 'dataChanged'
 			// },
-			registeredUser: "",
 			characters: [
 				{name:"a", chr:"a"}, 
 				{name:"b", chr:"b"}, 
@@ -193,13 +216,16 @@
 			// this was necessary because "}" (for instance) is a valid element ID but "#}" is not a valid selector
 			// so each item in the array of strings needed to become an object with the character 
 			// AND a selector-compatible identifier
+			palette: ["red", "yellow", "green", "blue", "cyan", "purple", "brown", "fuchsia", "greenyellow", "orange", "white", "gray"],
 			selectedChar: "",
+			selectedColor: "",
 			ranks: [],
 			files: ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x"],
 			newfileleft: 0,
 			newfileright: 0,
 			newrankup: 0,
 			newrankdown: 0,
+			user: "",
 			occupied: [],
 			space: ".",
 
@@ -209,6 +235,19 @@
 					this.ranks.push(i);
 				}
 				document.addEventListener("keyup", this.onKeyUp, false);
+				this.styleColorDivs();
+			},
+
+			styleColorDivs: function(){
+				var queryRoot = this.shadowRoot;
+				// console.log(queryRoot);
+				var resource = this.palette;
+				// console.log(resource);
+				for (var h = 0; h < this.palette.length; h++) {
+					queryRoot.getElementById(resource[h]).style.background=resource[h];
+					queryRoot.getElementById(resource[h]).style.opacity=0.9;
+					// console.log(queryRoot.getElementById(resource[h]));
+				} 
 			},
 
 			onKeyUp: function (evt) {
@@ -228,6 +267,7 @@
 				var keyHandler = {
 					37: function(){
 						console.log("left");
+
 					},
 					38: function(){
 						console.log("up");
@@ -254,9 +294,9 @@
 					return false;
 				} else {
 					var clickedId = "#" + el.toElement.id; // get selectable string of templated ID
-					var queried = this.shadowRoot;
-					var resource = this.characters;
-					var preselect = "";
+					var queried = this.shadowRoot;		// dump this shit
+					var resource = this.characters;		// into variables
+					var preselect = "";					// outside the scope of the for loop
 					// console.log(this.shadowRoot.querySelector(clickedId).className);
 					// console.log(this.shadowRoot.querySelectorAll(".possiblechar").array());
 					// console.log(this.characters);
@@ -280,49 +320,94 @@
 				}
 			},
 
+			fadeOthers: function(e){
+				// console.log(e.toElement.id);
+				// var payloadId = e.toElement.id;
+				// var clickedId = "#" + payloadId;
+				// console.log(clickedId);
+				// var queriedNode = this.shadowRoot;
+				// console.log(queriedNode.querySelector(clickedId));
+				// console.log(queriedNode.getElementById(clickedId));
+				var resource = this.palette;
+				// console.log(resource);
+				for (var k = 0; k < this.palette.length; k++){
+					// var itr = "#" + this.palette[k];
+					// console.log("setting " + itr + " to 0.3");
+					this.shadowRoot.getElementById(this.palette[k]).style.opacity=0.3;
+					// queriedEl.style.color=resource[k];
+				}
+				this.shadowRoot.getElementById(e.toElement.id).style.opacity=1;
+				this.selectedColor = e.toElement.id;
+				console.log(this.selectedColor);
+			},
+
 			sendChar: function(){
 				var unm = this.$.uname.value;
-				var uchr = this.selectedChar
-				if (uchr == "" || unm == "") {
-					alert("Need a name and a character");
+				var uchr = this.selectedChar;
+				var uclr = this.selectedColor; 
+				if (uchr == "" || unm == "" || uclr == "") {
+					alert("Need a name, character and color");
 				} else {
 					this.$.firebase.push({
-						rank: Math.floor(Math.random() * this.ranks.length),
-						file: this.files[Math.floor(Math.random() * this.files.length)],
+						rank: Math.floor(Math.random() * (this.ranks.length - 1)),
+						file: this.files[Math.floor(Math.random() * (this.files.length - 1))],
 						chr: uchr,
+						clr: uclr,
 						name: unm
 					});
 				}
 				this.shadowRoot.querySelector("#userconfig").style.display="none";
+				// after dicking around for way too long trying to register a user and make sure there was only 1
+				// I realized "I am thinking about this from the wrong end of the process"- 
+				// there's no need to check unity programmatically if I just disable the user's ability to
+				// create more characters after they create their first one.
 			},
 
 			childAdded: function(e){
 				var place = '#' + e.detail.value.file + e.detail.value.rank;
+				var child = this.shadowRoot.querySelector(place);
 				// console.log('placing ' + e.detail.value.chr + ' at ' + place);
-				this.shadowRoot.querySelector(place).innerHTML = e.detail.value.chr;
-				
-				// if (this.registeredUser == "") {
-				// 	console.log("setting username to: " + e.detail.name);
-				// 	this.registeredUser = e.detail.name;
-
-				// } else {
-				// 	console.log("user already present");
-				// }
-				// console.log(e.detail.name);
-				// console.log(this.registeredUser);
-				// console.log(e.detail.value);
+				child.innerHTML = e.detail.value.chr;
+				child.style.color=e.detail.value.clr;
 			},
 
-			update: function(p){
+			update: function(e){
 				// console.log("fuck");
-				// console.log(p);
+				console.log(e);
+				console.log(this.data);
+				for (var i in this.data){
+					console.log(i + " : " + this.data[i]);
+				}
+				console.log(this.keys);
+				// drop pre-push {{keys}} in a variable, and diff it with post-push {{keys}}
+				// Array.prototype.diff = function(a) {
+				// 	return this.filter(function(i) {return a.indexOf(i) < 0;});
+				// };
+				// returns new keys
+				// check each for correspondence to user-entered shit?
+				// then store that key?
 			}
 
 		});
 	</script>
 </polymer-element>
 
-sendchar: disable user config part (above the HR)
+disCount.on('value',function(snapshot){
+	if (snapshot.val() === null) {
+		console.log("no user yet");
+	} else {
+		console.log("position is " + snapshot.val().user.posx + "," + snapshot.val().user.posy);
+		newposxleft = snapshot.val().user.posx;
+		newposxleft--;
+		newposxright = snapshot.val().user.posx;
+		newposxright++;
+		newposyup = snapshot.val().user.posy;
+		newposyup--;
+		newposydown = snapshot.val().user.posy;
+		newposydown++;
+	}
+});
+
 
 
 	$(document).keydown(function(key) {
