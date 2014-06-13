@@ -342,9 +342,9 @@
 				},
 				'38': function(){
 					console.log("up");
-					var newplace = this.newfileup + this.data[this.user].rank;
+					var newIndex = this.files.indexOf(this.newfileup);
+					var newplace = this.files[newIndex] + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
-						var newIndex = this.files.indexOf(this.newfileup);
 						this.data[this.user].file = this.files[newIndex];
 						this.$.firebase.commitProperty(this.user);
 					}
@@ -359,9 +359,9 @@
 				},
 				'40': function(){
 					console.log("down");
-					var newplace = this.newfiledown + this.data[this.user].rank;
+					var newIndex = this.files.indexOf(this.newfiledown);
+					var newplace = this.files[newIndex] + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
-						var newIndex = this.files.indexOf(this.newfiledown);
 						this.data[this.user].file = this.files[newIndex];
 						this.$.firebase.commitProperty(this.user);
 					}
