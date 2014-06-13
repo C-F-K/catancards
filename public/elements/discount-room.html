@@ -347,6 +347,7 @@
 					}
 				},
 				'38': function(){
+<<<<<<< HEAD
 					// console.log("up");
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
@@ -358,6 +359,13 @@
 						// var payload = this.data[this.user];
 						// this.fire('premove', payload);
 						this.data[this.user].file = this.files[this.newfileup];
+=======
+					console.log("up");
+					var newIndex = this.files.indexOf(this.newfileup);
+					var newplace = this.files[newIndex] + this.data[this.user].rank;
+					if (this.canMove(newplace)) {
+						this.data[this.user].file = this.files[newIndex];
+>>>>>>> a7a44ba3577ba5d229ca36c0cc2676fb3316a6a0
 						this.$.firebase.commitProperty(this.user);
 					}
 				},
@@ -376,6 +384,7 @@
 					}
 				},
 				'40': function(){
+<<<<<<< HEAD
 					// console.log("down");
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
@@ -387,6 +396,13 @@
 						// var payload = this.data[this.user];
 						// this.fire('premove', payload);
 						this.data[this.user].file = this.files[this.newfiledown];
+=======
+					console.log("down");
+					var newIndex = this.files.indexOf(this.newfiledown);
+					var newplace = this.files[newIndex] + this.data[this.user].rank;
+					if (this.canMove(newplace)) {
+						this.data[this.user].file = this.files[newIndex];
+>>>>>>> a7a44ba3577ba5d229ca36c0cc2676fb3316a6a0
 						this.$.firebase.commitProperty(this.user);
 					}
 				},
