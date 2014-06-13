@@ -78,6 +78,7 @@
 								on-child-added={{childAdded}}
 								on-child-changed={{childChanged}}
 								on-child-removed={{childRemoved}}>
+
 			</firebase-element>
 			<div id="userconfig">
 				<label>Name:</label> 
@@ -238,7 +239,6 @@
 			newrankright: 0,
 			user: "",
 			lastknownkeys: [],
-			lastknownplace: "",
 			occupied: [],
 			space: " ",
 
@@ -247,12 +247,14 @@
 				// there was no _real_ need to do this programmatically but 
 				// a) I was not in the mood to type out an array of 80 items
 				// b) I wanted to make sure the template was repeating properly on arbitrary input
-				for (i = 0; i < 80; i++) {
-					this.ranks.push(i);
+				for (i = 0; i < 80; i++) { 	// x-axis ranks 0 to 79
+					this.ranks.push(i);		// y-axis files a to x (indices 0 to 23)
 				}
 				var boundOnKeyUp = this.onKeyUp.bind(this);
 				var boundUserLeaves = this.userLeaves.bind(this);
+				// var boundAboutToMove = this.aboutToMove.bind(this);
 				document.addEventListener("keyup", boundOnKeyUp, false);
+				// document.addEventListener("premove", boundAboutToMove, false);
 				this.styleColorDivs();
 				this.data = {};
 				document.addEventListener("unload", boundUserLeaves, false);
@@ -331,38 +333,60 @@
 			// keyHandler: {
 				// undefined at property 'file', wtf?
 				'37': function(){
-					console.log("left");
-					// console.log("context:")
-					// console.log(this);
+					// console.log("left");
+					// console.log("file: " + this.data[this.user].file);
+					// console.log("rank: " + this.data[this.user].rank);
+					// console.log("rank after moving: " + this.newrankleft);
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					var newplace = this.data[this.user].file + this.newrankleft;
 					if (this.canMove(newplace)) {
+						// var payload = this.data[this.user];
+						// this.fire('premove', payload);
 						this.data[this.user].rank = this.newrankleft;
-						this.$.firebase.commitProperty(this.user);
+						this.$.firebase.commitProperty(this.user); 
 					}
 				},
 				'38': function(){
-					console.log("up");
+					// console.log("up");
+					// console.log("file: " + this.data[this.user].file);
+					// console.log("rank: " + this.data[this.user].rank);
+					// console.log("file index after moving: " + this.newfileup);
+					// console.log("file after moving: " + this.files[this.newfileup]);
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					var newplace = this.newfileup + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
-						var newIndex = this.files.indexOf(this.newfileup);
-						this.data[this.user].file = this.files[newIndex];
+						// var payload = this.data[this.user];
+						// this.fire('premove', payload);
+						this.data[this.user].file = this.files[this.newfileup];
 						this.$.firebase.commitProperty(this.user);
 					}
 				},
 				'39': function(){
-					console.log("right");
+					// console.log("right");
+					// console.log("file: " + this.data[this.user].file);
+					// console.log("rank: " + this.data[this.user].rank);
+					// console.log("rank after moving: " + this.newrankright);
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					var newplace = this.data[this.user].file + this.newrankright;
 					if (this.canMove(newplace)) {
+						// var payload = this.data[this.user];
+						// this.fire('premove', payload);
 						this.data[this.user].rank = this.newrankright;
 						this.$.firebase.commitProperty(this.user);
 					}
 				},
 				'40': function(){
-					console.log("down");
+					// console.log("down");
+					// console.log("file: " + this.data[this.user].file);
+					// console.log("rank: " + this.data[this.user].rank);
+					// console.log("file index after moving: " + this.newfiledown);
+					// console.log("file after moving: " + this.files[this.newfiledown]);
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					var newplace = this.newfiledown + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
-						var newIndex = this.files.indexOf(this.newfiledown);
-						this.data[this.user].file = this.files[newIndex];
+						// var payload = this.data[this.user];
+						// this.fire('premove', payload);
+						this.data[this.user].file = this.files[this.newfiledown];
 						this.$.firebase.commitProperty(this.user);
 					}
 				},
@@ -370,15 +394,30 @@
 
 			canMove: function(newplace) {
 				if (this.occupied.indexOf(newplace) === -1) {
-					if (this.newrankleft === 0 || this.newrankright === 79 || this.newfileup === 0 || this.newfiledown === 23) {
-						return false;
+					if (this.newrankleft >= 0) {
+						if (this.newrankright < 80) {
+							if (this.newfileup >= 0) {
+								if (this.newfiledown < 24) {
+									return true;
+								} else {
+									return false;
+								}
+							} else {
+								return false;
+							}
+						} else {
+							return false;
+						}
 					} else {
-						return true;
+						return false;
 					}
 				} else {
 					return false;
 				}
 			},
+			// TODO: test canMove per direction
+			// because if any of these conditions is true the char freezes;
+			// ie. all chars tend to hit the edge and stop eventually.
 
 			clickChar: function(el) {
 				// console.log(el.toElement.id);
@@ -461,10 +500,6 @@
 				// create more characters after they create their first one.
 			},
 
-			update: function(){
-				// update display?
-			},
-
 			dataChange: function() {
 				if (this.user == "") {
 					console.log("you are not yet in the room");
@@ -473,6 +508,8 @@
 					console.log("your position is " + place);
 					// convert file to number
 					// then increment/decrement everything
+					// i'm an asshole and forgot that the numbers are INTEGERS
+					// and therefore I didn't have to re-get indexOf when moving.
 					var filenum = this.files.indexOf(this.data[this.user].file)
 					this.newfiledown = filenum;
 					this.newfiledown++;
@@ -501,6 +538,15 @@
 				var strungUID = "data." + e.detail.name;
 				this.observe[strungUID] = 'dataChange';
 			},
+
+			// aboutToMove: function(e){
+			// 	var oldplace = this.data[e.detail.name].file + this.data[e.detail.name].rank;
+			// 	console.log("about to move");
+			// 	console.log("old place: " + oldplace)
+				// TODO: grab old place data
+				// grab new place data (innerHTML of new place data is necessarily " ")
+				// switch the two around
+			// },
 
 			childChanged: function(e) {
 				var place = this.lastknownplace;
