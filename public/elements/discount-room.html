@@ -74,8 +74,10 @@
 								keys="{{keys}}"
 								log
 								childEvents								
-								on-data-change={{update}}
-								on-child-added={{childAdded}}>
+								on-data-change={{dataChange}}
+								on-child-added={{childAdded}}
+								on-child-changed={{childChanged}}
+								on-child-removed={{childRemoved}}>
 			</firebase-element>
 			<div id="userconfig">
 				<label>Name:</label> 
@@ -101,7 +103,7 @@
 				<!-- <button id="remove" on-click={{moveChar}}>Move</button> -->
 			</div>
 			<hr>
-			<table>
+			<table> 
 				<!-- Unlike RFK, the room has to exist independently of a putative user's desire to enter it. -->
 				<!-- TODO: theoretical waffling on the ontology of the singleplayer/multiplayer binary -->
 	        	<template repeat="{{ file in files }}">
@@ -114,10 +116,19 @@
 		    </table>
 	</template>
 	<script>
+		// might need this function to check all keys for local user;
+		// underscore could apparently do this elegantly but  
+		// explicitly not using third-party libraries besides Polymer
+		// for reasons which are not clear. probably masochism.
+		// or maybe it's a more effective demonstration of web components
+		// if I only use in-house shit. dunno.
+		// Array.prototype.diff = function(a) {
+		// 	return this.filter(function(i) {return a.indexOf(i) < 0;});
+		// };
+
 		Polymer('discount-room', {
-			// observe: {
-			// 	data: 'dataChanged'
-			// },
+			observe: {
+			},
 			characters: [
 				{name:"a", chr:"a"}, 
 				{name:"b", chr:"b"}, 
@@ -221,21 +232,34 @@
 			selectedColor: "",
 			ranks: [],
 			files: ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x"],
-			newfileleft: 0,
-			newfileright: 0,
-			newrankup: 0,
-			newrankdown: 0,
+			newfileup: 0,
+			newfiledown: 0,
+			newrankleft: 0,
+			newrankright: 0,
 			user: "",
+			lastknownkeys: [],
+			lastknownplace: "",
 			occupied: [],
-			space: ".",
+			space: " ",
 
 			ready: function (){
 				// console.log(this.data + ":" + this.keys);
+				// there was no _real_ need to do this programmatically but 
+				// a) I was not in the mood to type out an array of 80 items
+				// b) I wanted to make sure the template was repeating properly on arbitrary input
 				for (i = 0; i < 80; i++) {
 					this.ranks.push(i);
 				}
-				document.addEventListener("keyup", this.onKeyUp, false);
+				var boundOnKeyUp = this.onKeyUp.bind(this);
+				var boundUserLeaves = this.userLeaves.bind(this);
+				document.addEventListener("keyup", boundOnKeyUp, false);
 				this.styleColorDivs();
+				this.data = {};
+				document.addEventListener("unload", boundUserLeaves, false);
+			},
+
+			userLeaves: function() {
+				this.$.firebase.remove(this.user);
 			},
 
 			styleColorDivs: function(){
@@ -264,26 +288,95 @@
 				// But I think the principle gives your average unauthorized party WAY too much credit
 				// (in the case of average users) or WAY not enough (in the case of people who can program).
 				// frustrate++; sigh();
-				var keyHandler = {
-					37: function(){
-						console.log("left");
 
-					},
-					38: function(){
-						console.log("up");
-					},
-					39: function(){
-						console.log("right");
-					},
-					40: function(){
-						console.log("down");
-					}
-				};
+				// AGH!
+				// next scope problem: referring to this.data[this.user] from within keyHandler.
+				// the 'this' keyword (somewhat obviously in hindsight) refers to that object
+				// and not to the one fed to Polymer().
+				// I'm going to DRY this up and see if that helps.
+
+				// NOPE, the problem is that the context ("this") of the key event is #document.
+				// changed the listener's binding to window, see if that's it.
+				// that caused more problems than it solved.
+
+				// i need to change the context of onKeyUp to this Polymer() object,
+				// which seems inevitably to require I know how to reference the damn thing.
+				// except I don't seem to be able to. it's parsed at runtime.
+
+				// NOPE AGAIN
+				// the context is still inside the fukken keyhandler object.
+				// I am moving all the handler properties to the main Polymer() object
+				// because this is asinine.
+
+				// don't code this early in the morning. (~5:45)
+				// your logic is fine but your perceptions are skewed.
+
+				// console.log("context:")
+				// console.log(this);
 				if (evt = evt ? evt : window.event ? event : null) {
 					// console.log(evt.keyCode);
-					if (keyHandler[evt.keyCode]) {
-						keyHandler[evt.keyCode]();
+					// console.log("this inside:")
+					// console.log(this);
+					if (this[evt.keyCode]) {
+						this[evt.keyCode]();
 					}
+				}
+			},
+				// if not at edge of room
+				// 		and if newplace is not occupied
+				// return true
+				// if test is true then set rank and file to newrank and newfile
+				// else don't change rank and file
+
+			// keyHandler: {
+				// undefined at property 'file', wtf?
+				'37': function(){
+					console.log("left");
+					// console.log("context:")
+					// console.log(this);
+					var newplace = this.data[this.user].file + this.newrankleft;
+					if (this.canMove(newplace)) {
+						this.data[this.user].rank = this.newrankleft;
+						this.$.firebase.commitProperty(this.user);
+					}
+				},
+				'38': function(){
+					console.log("up");
+					var newplace = this.newfileup + this.data[this.user].rank;
+					if (this.canMove(newplace)) {
+						var newIndex = this.files.indexOf(this.newfileup);
+						this.data[this.user].file = this.files[newIndex];
+						this.$.firebase.commitProperty(this.user);
+					}
+				},
+				'39': function(){
+					console.log("right");
+					var newplace = this.data[this.user].file + this.newrankright;
+					if (this.canMove(newplace)) {
+						this.data[this.user].rank = this.newrankright;
+						this.$.firebase.commitProperty(this.user);
+					}
+				},
+				'40': function(){
+					console.log("down");
+					var newplace = this.newfiledown + this.data[this.user].rank;
+					if (this.canMove(newplace)) {
+						var newIndex = this.files.indexOf(this.newfiledown);
+						this.data[this.user].file = this.files[newIndex];
+						this.$.firebase.commitProperty(this.user);
+					}
+				},
+			// },
+
+			canMove: function(newplace) {
+				if (this.occupied.indexOf(newplace) === -1) {
+					if (this.newrankleft === 0 || this.newrankright === 79 || this.newfileup === 0 || this.newfiledown === 23) {
+						return false;
+					} else {
+						return true;
+					}
+				} else {
+					return false;
 				}
 			},
 
@@ -328,6 +421,9 @@
 				// var queriedNode = this.shadowRoot;
 				// console.log(queriedNode.querySelector(clickedId));
 				// console.log(queriedNode.getElementById(clickedId));
+				// this and clickChar could potentially be refactored into a single click handler
+				// but initial experience seems to suggest that would result in scope problems.
+				// I blame Polymer. 
 				var resource = this.palette;
 				// console.log(resource);
 				for (var k = 0; k < this.palette.length; k++){
@@ -338,7 +434,7 @@
 				}
 				this.shadowRoot.getElementById(e.toElement.id).style.opacity=1;
 				this.selectedColor = e.toElement.id;
-				console.log(this.selectedColor);
+				// console.log(this.selectedColor);
 			},
 
 			sendChar: function(){
@@ -348,6 +444,8 @@
 				if (uchr == "" || unm == "" || uclr == "") {
 					alert("Need a name, character and color");
 				} else {
+					this.lastknownkeys = this.keys;
+					console.log(this.lastknownkeys);
 					this.$.firebase.push({
 						rank: Math.floor(Math.random() * (this.ranks.length - 1)),
 						file: this.files[Math.floor(Math.random() * (this.files.length - 1))],
@@ -358,105 +456,65 @@
 				}
 				this.shadowRoot.querySelector("#userconfig").style.display="none";
 				// after dicking around for way too long trying to register a user and make sure there was only 1
-				// I realized "I am thinking about this from the wrong end of the process"- 
+				// I realized "I am thinking about this from the wrong end of the process" - 
 				// there's no need to check unity programmatically if I just disable the user's ability to
 				// create more characters after they create their first one.
 			},
 
+			update: function(){
+				// update display?
+			},
+
+			dataChange: function() {
+				if (this.user == "") {
+					console.log("you are not yet in the room");
+				} else {
+					var place = this.data[this.user].file + this.data[this.user].rank;
+					console.log("your position is " + place);
+					// convert file to number
+					// then increment/decrement everything
+					var filenum = this.files.indexOf(this.data[this.user].file)
+					this.newfiledown = filenum;
+					this.newfiledown++;
+					this.newfileup = filenum;
+					this.newfileup--;
+					this.newrankleft = this.data[this.user].rank;
+					this.newrankleft--;
+					this.newrankright = this.data[this.user].rank;
+					this.newrankright++;
+				}
+			},
+
 			childAdded: function(e){
+				if (this.user == "") { // how the seven hells did it take me this long 
+					this.user = e.detail.name;
+					console.log('you have been assigned uID ' + this.user);
+				}
 				var place = '#' + e.detail.value.file + e.detail.value.rank;
 				var child = this.shadowRoot.querySelector(place);
 				// console.log('placing ' + e.detail.value.chr + ' at ' + place);
 				child.innerHTML = e.detail.value.chr;
 				child.style.color=e.detail.value.clr;
+				this.occupied.push(place.substring(1));
+				console.log("user " + e.detail.value.name + " has entered the room at " + place.substring(1));
+				// totally violating DRY here but IDGAF tbqh
+				var strungUID = "data." + e.detail.name;
+				this.observe[strungUID] = 'dataChange';
 			},
 
-			update: function(e){
-				// console.log("fuck");
-				console.log(e);
-				console.log(this.data);
-				for (var i in this.data){
-					console.log(i + " : " + this.data[i]);
-				}
-				console.log(this.keys);
-				// drop pre-push {{keys}} in a variable, and diff it with post-push {{keys}}
-				// Array.prototype.diff = function(a) {
-				// 	return this.filter(function(i) {return a.indexOf(i) < 0;});
-				// };
-				// returns new keys
-				// check each for correspondence to user-entered shit?
-				// then store that key?
-			}
+			childChanged: function(e) {
+				var place = this.lastknownplace;
+				this.occupied.splice(this.occupied.indexOf(place), 1);
+				var newplace = e.detail.value.file + e.detail.value.rank;
+				this.occupied.push(newplace);
+			},
 
+			childRemoved: function(e) {
+				var place = e.detail.value.file + e.detail.value.rank;
+				this.occupied.splice(this.occupied.indexOf(place), 1);
+				this.shadowRoot.getElementById(place).innerHTML = this.space;
+				console.log("user " + e.detail.value.name + " has left the room");
+			}
 		});
 	</script>
 </polymer-element>
-
-disCount.on('value',function(snapshot){
-	if (snapshot.val() === null) {
-		console.log("no user yet");
-	} else {
-		console.log("position is " + snapshot.val().user.posx + "," + snapshot.val().user.posy);
-		newposxleft = snapshot.val().user.posx;
-		newposxleft--;
-		newposxright = snapshot.val().user.posx;
-		newposxright++;
-		newposyup = snapshot.val().user.posy;
-		newposyup--;
-		newposydown = snapshot.val().user.posy;
-		newposydown++;
-	}
-});
-
-
-
-	$(document).keydown(function(key) {
-		switch(parseInt(key.which,10)) {
-			case 37:
-				//left
-				disCount.child('user').child('posx').set(newposxleft);
-				//$('img').animate({left: "-=10px"}, 'fast');
-				break;
-			case 40:
-				//down
-				disCount.child('user').child('posy').set(newposydown);
-				//$('img').animate({top: "+=10px"}, 'fast');
-				break;
-			case 38:
-				//up
-				disCount.child('user').child('posy').set(newposyup);
-				//$('img').animate({top: "-=10px"}, 'fast');
-				break;
-			case 39:
-				//right				
-				disCount.child('user').child('posx').set(newposxright);
-				//$('img').animate({left: "+=10px"}, 'fast');
-				break;
-			case 82:
-				// press 'r' to attempt to write roomContents to room div
-				concreteRoom();
-			default:
-				break;
-		}
-	});	
-});
-
-			dataChanged: function(snap){
-				console.log(snap);
-				if (snap.detail.value === null) {
-					console.log("no user yet");
-				} else {
-					for (key in snap.detail) {
-						var name = snap.detail.name;
-						console.log("position is " + snap.detail.value.name.file + "," + snap.detail.value.name.rank);
-						this.newposxleft = snap.detail.value.name.file;
-						this.newposxleft--;
-						this.newposxright = snap.detail.value.name.file;
-						this.newposxright++;
-						this.newposyup = snap.detail.value.name.rank;
-						this.newposyup--;
-						this.newposydown = snap.detail.value.name.rank;
-						this.newposydown++;
-					}
-				}
-			},
