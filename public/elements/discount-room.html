@@ -333,7 +333,7 @@
 			// keyHandler: {
 				// undefined at property 'file', wtf?
 				'37': function(){
-					// console.log("left");
+					console.log("left");
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("rank after moving: " + this.newrankleft);
@@ -347,8 +347,7 @@
 					}
 				},
 				'38': function(){
-<<<<<<< HEAD
-					// console.log("up");
+					console.log("up");
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("file index after moving: " + this.newfileup);
@@ -359,18 +358,11 @@
 						// var payload = this.data[this.user];
 						// this.fire('premove', payload);
 						this.data[this.user].file = this.files[this.newfileup];
-=======
-					console.log("up");
-					var newIndex = this.files.indexOf(this.newfileup);
-					var newplace = this.files[newIndex] + this.data[this.user].rank;
-					if (this.canMove(newplace)) {
-						this.data[this.user].file = this.files[newIndex];
->>>>>>> a7a44ba3577ba5d229ca36c0cc2676fb3316a6a0
 						this.$.firebase.commitProperty(this.user);
 					}
 				},
 				'39': function(){
-					// console.log("right");
+					console.log("right");
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("rank after moving: " + this.newrankright);
@@ -384,8 +376,7 @@
 					}
 				},
 				'40': function(){
-<<<<<<< HEAD
-					// console.log("down");
+					console.log("down");
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("file index after moving: " + this.newfiledown);
@@ -396,13 +387,6 @@
 						// var payload = this.data[this.user];
 						// this.fire('premove', payload);
 						this.data[this.user].file = this.files[this.newfiledown];
-=======
-					console.log("down");
-					var newIndex = this.files.indexOf(this.newfiledown);
-					var newplace = this.files[newIndex] + this.data[this.user].rank;
-					if (this.canMove(newplace)) {
-						this.data[this.user].file = this.files[newIndex];
->>>>>>> a7a44ba3577ba5d229ca36c0cc2676fb3316a6a0
 						this.$.firebase.commitProperty(this.user);
 					}
 				},
@@ -410,30 +394,52 @@
 
 			canMove: function(newplace) {
 				if (this.occupied.indexOf(newplace) === -1) {
-					if (this.newrankleft >= 0) {
-						if (this.newrankright < 80) {
-							if (this.newfileup >= 0) {
-								if (this.newfiledown < 24) {
-									return true;
-								} else {
-									return false;
-								}
-							} else {
-								return false;
-							}
-						} else {
-							return false;
-						}
-					} else {
-						return false;
-					}
+					return true;
 				} else {
 					return false;
 				}
+				// else {
+				// 	var newrankleft = this.newrankleft;
+				// 	var newfileup = this.newfileup;
+				// 	var newrankright = this.newrankright;
+				// 	var newfiledown = this.newfiledown;
+				// 	var collisionHandler = {
+				// 		'left': function() {
+				// 			if (newrankleft >= 0) {
+				// 				return false;
+				// 			}
+				// 		},
+				// 		'up': function() {
+				// 			if (newfileup >= 0) {
+				// 				return false;
+				// 			}
+				// 		}, 
+				// 		'right': function() {
+				// 			if (newrankright >= 80) {
+				// 				return false;
+				// 			}
+				// 		},
+				// 		'down': function() {
+				// 			if (newfiledown >= 24) {
+				// 				return false;
+				// 			}
+				// 		}
+				// 	};
+				// 	if (collisionHandler[direction]) {
+				// 		(collisionHandler[direction]);
+				// 	} else {
+				// 		return true;
+				// 	}
+				// }
 			},
-			// TODO: test canMove per direction
-			// because if any of these conditions is true the char freezes;
-			// ie. all chars tend to hit the edge and stop eventually.
+					// I could have done this with keys on a POJO like Jan Hein suggested
+					// I do for the arrow key handlers, but after the grief that gave me
+					// trying to get it to respond to the correct scope (and taking into account
+					// the possibility that I might need to declare ie. 'left' on my Polymer()
+					// object before I'm done) there's no way in hell I'm doing that shit
+					// intentionally ever again within a Polymer element.
+					// notional hierarchy of multi-conditionals:
+					// POJOkeys > else ifs > switch/case
 
 			clickChar: function(el) {
 				// console.log(el.toElement.id);
@@ -498,6 +504,7 @@
 				var uclr = this.selectedColor; 
 				if (uchr == "" || unm == "" || uclr == "") {
 					alert("Need a name, character and color");
+					return false;
 				} else {
 					this.lastknownkeys = this.keys;
 					console.log(this.lastknownkeys);
