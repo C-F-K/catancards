@@ -97,11 +97,9 @@
 
 				</div>
 				<br>
-				<!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
 				<div id="buttoncontainer">
 					<button id="submit" on-click={{sendChar}}>Submit</button>
 				</div>
-				<!-- <button id="remove" on-click={{moveChar}}>Move</button> -->
 			</div>
 			<hr>
 			<table> 
@@ -256,11 +254,13 @@
 				document.addEventListener("keyup", boundOnKeyUp, false);
 				// document.addEventListener("premove", boundAboutToMove, false);
 				this.styleColorDivs();
-				this.data = {};
+				// this.data = {};
 				document.addEventListener("unload", boundUserLeaves, false);
 			},
 
 			userLeaves: function() {
+				// currently removes eeeeveryone, this is not the idea
+				// also doesn't correctly trigger the unload event when deployed
 				this.$.firebase.remove(this.user);
 			},
 
