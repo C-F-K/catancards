@@ -337,7 +337,10 @@
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("rank after moving: " + this.newrankleft);
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					if (this.data[this.user].rank === 0) {
+						return false;
+					}
 					var newplace = this.data[this.user].file + this.newrankleft;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -352,7 +355,10 @@
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("file index after moving: " + this.newfileup);
 					// console.log("file after moving: " + this.files[this.newfileup]);
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					if (this.data[this.user].file === 'a') {
+						return false;
+					}
 					var newplace = this.newfileup + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -366,7 +372,10 @@
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("rank after moving: " + this.newrankright);
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					if (this.data[this.user].rank === 79) {
+						return false;
+					}
 					var newplace = this.data[this.user].file + this.newrankright;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -381,7 +390,10 @@
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("file index after moving: " + this.newfiledown);
 					// console.log("file after moving: " + this.files[this.newfiledown]);
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					if (this.data[this.user].file === 'x') {
+						return false;
+					}
 					var newplace = this.newfiledown + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -398,6 +410,8 @@
 				} else {
 					return false;
 				}
+			},
+				
 				// else {
 				// 	var newrankleft = this.newrankleft;
 				// 	var newfileup = this.newfileup;
@@ -431,7 +445,7 @@
 				// 		return true;
 				// 	}
 				// }
-			},
+		
 					// I could have done this with keys on a POJO like Jan Hein suggested
 					// I do for the arrow key handlers, but after the grief that gave me
 					// trying to get it to respond to the correct scope (and taking into account
