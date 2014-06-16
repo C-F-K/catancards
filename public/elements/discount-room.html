@@ -546,21 +546,23 @@
 				if (this.user == "") {
 					console.log("you are not yet in the room");
 				} else {
-					var place = this.data[this.user].file + this.data[this.user].rank;
-					console.log("your position is " + place);
-					// convert file to number
-					// then increment/decrement everything
-					// i'm an asshole and forgot that the numbers are INTEGERS
-					// and therefore I didn't have to re-get indexOf when moving.
-					var filenum = this.files.indexOf(this.data[this.user].file)
-					this.newfiledown = filenum;
-					this.newfiledown++;
-					this.newfileup = filenum;
-					this.newfileup--;
-					this.newrankleft = this.data[this.user].rank;
-					this.newrankleft--;
-					this.newrankright = this.data[this.user].rank;
-					this.newrankright++;
+					if (this.data[this.user]) {
+						var place = this.data[this.user].file + this.data[this.user].rank;
+						console.log("your position is " + place);
+						// convert file to number
+						// then increment/decrement everything
+						// i'm an asshole and forgot that the numbers are INTEGERS
+						// and therefore I didn't have to re-get indexOf when moving.
+						var filenum = this.files.indexOf(this.data[this.user].file)
+						this.newfiledown = filenum;
+						this.newfiledown++;
+						this.newfileup = filenum;
+						this.newfileup--;
+						this.newrankleft = this.data[this.user].rank;
+						this.newrankleft--;
+						this.newrankright = this.data[this.user].rank;
+						this.newrankright++;
+					}
 				}
 			},
 
@@ -602,6 +604,7 @@
 			},
 
 			childRemoved: function(e) {
+				// console.log(e);
 				var place = e.detail.value.file + e.detail.value.rank;
 				this.occupied.splice(this.occupied.indexOf(place), 1);
 				this.shadowRoot.getElementById(place).innerHTML = this.space;
