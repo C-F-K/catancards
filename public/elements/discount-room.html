@@ -516,6 +516,17 @@
 				// console.log(this.selectedColor);
 			},
 
+			randomPlace: function() {
+				var file = this.files[Math.floor(Math.random() * (this.files.length - 1))];
+				var rank = Math.floor(Math.random()*(this.ranks.length -1));
+				var place = file + rank;
+				if (this.occupied.indexOf(place) === -1) {
+					return place;
+				} else {
+					this.randomPlace();
+				}
+			},
+
 			sendChar: function(){
 				var unm = this.$.uname.value;
 				var uchr = this.selectedChar;
@@ -526,9 +537,12 @@
 				} else {
 					this.lastknownkeys = this.keys;
 					console.log(this.lastknownkeys);
+					var startplace = this.randomPlace();
+					var startfile = startplace.substring(0,1);
+					var startrank = startplace.substring(1);
 					this.$.firebase.push({
-						rank: Math.floor(Math.random() * (this.ranks.length - 1)),
-						file: this.files[Math.floor(Math.random() * (this.files.length - 1))],
+						rank: startrank,
+						file: startfile,
 						chr: uchr,
 						clr: uclr,
 						name: unm,
@@ -608,6 +622,8 @@
 				var place = e.detail.value.file + e.detail.value.rank;
 				this.occupied.splice(this.occupied.indexOf(place), 1);
 				this.shadowRoot.getElementById(place).innerHTML = this.space;
+				var unStrungUID = "data." + e.detail.name;
+				this.observe.splice(this.observe.indexOf(unStrungUID), 1);
 				console.log("user " + e.detail.value.name + " has left the room");
 			},
 
