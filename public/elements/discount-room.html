@@ -337,10 +337,11 @@
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("rank after moving: " + this.newrankleft);
-					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					if (this.data[this.user].rank === 0) {
 						return false;
 					}
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					this.data[this.user].lastknownplace = oldplace;
 					var newplace = this.data[this.user].file + this.newrankleft;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -355,10 +356,11 @@
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("file index after moving: " + this.newfileup);
 					// console.log("file after moving: " + this.files[this.newfileup]);
-					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					if (this.data[this.user].file === 'a') {
 						return false;
 					}
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					this.data[this.user].lastknownplace = oldplace;
 					var newplace = this.newfileup + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -372,10 +374,11 @@
 					// console.log("file: " + this.data[this.user].file);
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("rank after moving: " + this.newrankright);
-					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					if (this.data[this.user].rank === 79) {
 						return false;
 					}
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					this.data[this.user].lastknownplace = oldplace;
 					var newplace = this.data[this.user].file + this.newrankright;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -390,10 +393,11 @@
 					// console.log("rank: " + this.data[this.user].rank);
 					// console.log("file index after moving: " + this.newfiledown);
 					// console.log("file after moving: " + this.files[this.newfiledown]);
-					// var oldplace = this.data[this.user].file + this.data[this.user].rank;
 					if (this.data[this.user].file === 'x') {
 						return false;
 					}
+					var oldplace = this.data[this.user].file + this.data[this.user].rank;
+					this.data[this.user].lastknownplace = oldplace;
 					var newplace = this.newfiledown + this.data[this.user].rank;
 					if (this.canMove(newplace)) {
 						// var payload = this.data[this.user];
@@ -527,7 +531,8 @@
 						file: this.files[Math.floor(Math.random() * (this.files.length - 1))],
 						chr: uchr,
 						clr: uclr,
-						name: unm
+						name: unm,
+						lastknownplace: ""
 					});
 				}
 				this.shadowRoot.querySelector("#userconfig").style.display="none";
@@ -586,10 +591,14 @@
 			// },
 
 			childChanged: function(e) {
-				var place = this.lastknownplace;
-				this.occupied.splice(this.occupied.indexOf(place), 1);
+				// console.log(e);
+				var chr = e.detail.value.chr;
+				var clr = e.detail.value.clr;
+				var oldplace = e.detail.value.lastknownplace;
+				this.occupied.splice(this.occupied.indexOf(oldplace), 1);
 				var newplace = e.detail.value.file + e.detail.value.rank;
 				this.occupied.push(newplace);
+				this.displayUpdate(oldplace,newplace,chr,clr);
 			},
 
 			childRemoved: function(e) {
@@ -597,6 +606,14 @@
 				this.occupied.splice(this.occupied.indexOf(place), 1);
 				this.shadowRoot.getElementById(place).innerHTML = this.space;
 				console.log("user " + e.detail.value.name + " has left the room");
+			},
+
+			displayUpdate: function(oldplace, newplace, chr, clr) {
+				// console.log("old place: " + this.shadowRoot.getElementById(oldplace).innerHTML);
+				this.shadowRoot.getElementById(oldplace).innerHTML = this.space;
+				// console.log("new place: " + this.shadowRoot.getElementById(newplace).innerHTML);
+				this.shadowRoot.getElementById(newplace).innerHTML = chr;
+				this.shadowRoot.getElementById(newplace).style.color = clr;
 			}
 		});
 	</script>
