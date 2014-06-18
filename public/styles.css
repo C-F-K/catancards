@@ -10,3 +10,8 @@ body {
 h1, h2, h3 {
     text-align: center;
 }
+
+spoiler-alert {
+	text-align:center;
+	margin: 0px auto 0px auto;
+}

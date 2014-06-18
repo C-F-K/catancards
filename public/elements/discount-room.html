@@ -78,7 +78,6 @@
 								on-child-added={{childAdded}}
 								on-child-changed={{childChanged}}
 								on-child-removed={{childRemoved}}>
-
 			</firebase-element>
 			<div id="userconfig">
 				<label>Name:</label> 
@@ -94,7 +93,6 @@
 					<template repeat="{{ color in palette }}">
 						<div class="singlecolor" id="{{color}}" on-click={{fadeOthers}}></div>
 					</template>
-
 				</div>
 				<br>
 				<div id="buttoncontainer">
@@ -103,8 +101,6 @@
 			</div>
 			<hr>
 			<table> 
-				<!-- Unlike RFK, the room has to exist independently of a putative user's desire to enter it. -->
-				<!-- TODO: theoretical waffling on the ontology of the singleplayer/multiplayer binary -->
 	        	<template repeat="{{ file in files }}">
 	        	    <tr>
 	        	        <template repeat="{{ rank in ranks }}">
@@ -115,17 +111,9 @@
 		    </table>
 	</template>
 	<script>
-		// might need this function to check all keys for local user;
-		// underscore could apparently do this elegantly but  
-		// explicitly not using third-party libraries besides Polymer
-		// for reasons which are not clear. probably masochism.
-		// or maybe it's a more effective demonstration of web components
-		// if I only use in-house shit. dunno.
-		// Array.prototype.diff = function(a) {
-		// 	return this.filter(function(i) {return a.indexOf(i) < 0;});
-		// };
-
 		Polymer('discount-room', {
+			debug: 0,
+			readyFlag: 0,
 			observe: {
 			},
 			characters: [
@@ -222,191 +210,192 @@
 				{name:"closecurlybrace", chr:"}"}, 
 				{name:"tilde", chr:"~"}
 			],
-			// character list cribbed shamelessly from robotfindskitten; painstakingly objectified it myself
-			// this was necessary because "}" (for instance) is a valid element ID but "#}" is not a valid selector
-			// so each item in the array of strings needed to become an object with the character 
-			// AND a selector-compatible identifier
-			palette: ["red", "yellow", "green", "blue", "cyan", "purple", "brown", "fuchsia", "greenyellow", "orange", "white", "gray"],
+			palette: [
+				"red", 
+				"yellow", 
+				"green", 
+				"blue", 
+				"cyan", 
+				"purple", 
+				"brown", 
+				"fuchsia", 
+				"greenyellow", 
+				"orange", 
+				"white", 
+				"gray"
+			],
 			selectedChar: "",
 			selectedColor: "",
 			ranks: [],
-			files: ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x"],
+			files: [
+				"a",
+				"b",
+				"c",
+				"d",
+				"e",
+				"f",
+				"g",
+				"h",
+				"i",
+				"j",
+				"k",
+				"l",
+				"m",
+				"n",
+				"o",
+				"p",
+				"q",
+				"r",
+				"s",
+				"t",
+				"u",
+				"v",
+				"w",
+				"x"
+			],
 			newfileup: 0,
 			newfiledown: 0,
 			newrankleft: 0,
 			newrankright: 0,
 			user: "",
-			lastknownkeys: [],
 			occupied: [],
 			space: " ",
+			lastknownkeys: [],
 
 			ready: function (){
-				// console.log(this.data + ":" + this.keys);
-				// there was no _real_ need to do this programmatically but 
-				// a) I was not in the mood to type out an array of 80 items
-				// b) I wanted to make sure the template was repeating properly on arbitrary input
-				for (i = 0; i < 80; i++) { 	// x-axis ranks 0 to 79
-					this.ranks.push(i);		// y-axis files a to x (indices 0 to 23)
+				if (this.debug) {console.log('debug mode is set'); 
+				console.log(this.data + ":" + this.keys);}
+				for (i = 0; i < 80; i++) {
+					this.ranks.push(i);
 				}
+				this.styleColorDivs();
 				var boundOnKeyUp = this.onKeyUp.bind(this);
 				var boundUserLeaves = this.userLeaves.bind(this);
-				// var boundAboutToMove = this.aboutToMove.bind(this);
 				document.addEventListener("keyup", boundOnKeyUp, false);
-				// document.addEventListener("premove", boundAboutToMove, false);
-				this.styleColorDivs();
-				// this.data = {};
 				document.addEventListener("unload", boundUserLeaves, false);
+				setInterval(this.screenScrub(), 3000);
+				this.readyFlag = 1;
 			},
+			// currently: only the first user to join a space is moved
+			// doesn't correctly trigger the unload event when deployed
 
 			userLeaves: function() {
-				// currently removes eeeeveryone, this is not the idea
-				// also doesn't correctly trigger the unload event when deployed
 				this.$.firebase.remove(this.user);
+			},
+
+			screenScrub: function() {
+				if (this.readyFlag) {
+					for (var i = 0; i < this.files.length; i++) {
+						for (var j = 0; j < this.ranks.length; j++) {
+							var scrub = this.files[i] + this.ranks[j];
+							if (this.occupied.indexOf(scrub) === -1) {
+								this.shadowRoot.getElementById(scrub).innerHTML = this.space;
+							}
+						}
+					}
+				}
 			},
 
 			styleColorDivs: function(){
 				var queryRoot = this.shadowRoot;
-				// console.log(queryRoot);
+				if (this.debug) { console.log('function styleColorDivs:' + queryRoot); }
 				var resource = this.palette;
-				// console.log(resource);
+				if (this.debug) { console.log('function styleColorDivs:' + resource); }
 				for (var h = 0; h < this.palette.length; h++) {
 					queryRoot.getElementById(resource[h]).style.background=resource[h];
 					queryRoot.getElementById(resource[h]).style.opacity=0.9;
-					// console.log(queryRoot.getElementById(resource[h]));
+					if (this.debug) { console.log('function styleColorDivs:' + queryRoot.getElementById(resource[h])); }
 				} 
 			},
 
 			onKeyUp: function (evt) {
-				// SO much bullshit wasted effort trying to get the element to talk to shit outside it
-				// The document could hear the keyup but the element couldn't unless it was inside a text field
-				// and then I needed the function to access the keyHandler object, which it wouldn't
-				// so I eventually said "fuck it" and put the object inside the function.
-				// This might not be best practices but a) IDGAF at this point and b) this appears to be the only way.
-				// Friggin' encapsulation, I swear. Whose idea was this?
-				// How is defining several levels of access not just making everyone's job harder?
-				// Wikipedia says encapsulation is to prevent "unauthorized parties" accessing data
-				// And ironically by bundling my handler object in the only function that needs it,
-				// that seems to be what I've done.
-				// But I think the principle gives your average unauthorized party WAY too much credit
-				// (in the case of average users) or WAY not enough (in the case of people who can program).
-				// frustrate++; sigh();
-
-				// AGH!
-				// next scope problem: referring to this.data[this.user] from within keyHandler.
-				// the 'this' keyword (somewhat obviously in hindsight) refers to that object
-				// and not to the one fed to Polymer().
-				// I'm going to DRY this up and see if that helps.
-
-				// NOPE, the problem is that the context ("this") of the key event is #document.
-				// changed the listener's binding to window, see if that's it.
-				// that caused more problems than it solved.
-
-				// i need to change the context of onKeyUp to this Polymer() object,
-				// which seems inevitably to require I know how to reference the damn thing.
-				// except I don't seem to be able to. it's parsed at runtime.
-
-				// NOPE AGAIN
-				// the context is still inside the fukken keyhandler object.
-				// I am moving all the handler properties to the main Polymer() object
-				// because this is asinine.
-
-				// don't code this early in the morning. (~5:45)
-				// your logic is fine but your perceptions are skewed.
-
-				// console.log("context:")
-				// console.log(this);
+				if (this.debug) { console.log("function onKeyUp: context:");
+				console.log(this); }
 				if (evt = evt ? evt : window.event ? event : null) {
-					// console.log(evt.keyCode);
-					// console.log("this inside:")
-					// console.log(this);
+					if (this.debug) { console.log(evt.keyCode);
+					console.log("function onKeyUp: this inside:");
+					console.log(this); }
 					if (this[evt.keyCode]) {
 						this[evt.keyCode]();
 					}
 				}
 			},
-				// if not at edge of room
-				// 		and if newplace is not occupied
-				// return true
-				// if test is true then set rank and file to newrank and newfile
-				// else don't change rank and file
 
-			// keyHandler: {
-				// undefined at property 'file', wtf?
-				'37': function(){
-					console.log("left");
-					// console.log("file: " + this.data[this.user].file);
-					// console.log("rank: " + this.data[this.user].rank);
-					// console.log("rank after moving: " + this.newrankleft);
-					if (this.data[this.user].rank === 0) {
-						return false;
-					}
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
-					this.data[this.user].lastknownplace = oldplace;
-					var newplace = this.data[this.user].file + this.newrankleft;
-					if (this.canMove(newplace)) {
-						// var payload = this.data[this.user];
-						// this.fire('premove', payload);
-						this.data[this.user].rank = this.newrankleft;
-						this.$.firebase.commitProperty(this.user); 
-					}
-				},
-				'38': function(){
-					console.log("up");
-					// console.log("file: " + this.data[this.user].file);
-					// console.log("rank: " + this.data[this.user].rank);
-					// console.log("file index after moving: " + this.newfileup);
-					// console.log("file after moving: " + this.files[this.newfileup]);
-					if (this.data[this.user].file === 'a') {
-						return false;
-					}
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
-					this.data[this.user].lastknownplace = oldplace;
-					var newplace = this.newfileup + this.data[this.user].rank;
-					if (this.canMove(newplace)) {
-						// var payload = this.data[this.user];
-						// this.fire('premove', payload);
-						this.data[this.user].file = this.files[this.newfileup];
-						this.$.firebase.commitProperty(this.user);
-					}
-				},
-				'39': function(){
-					console.log("right");
-					// console.log("file: " + this.data[this.user].file);
-					// console.log("rank: " + this.data[this.user].rank);
-					// console.log("rank after moving: " + this.newrankright);
-					if (this.data[this.user].rank === 79) {
-						return false;
-					}
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
-					this.data[this.user].lastknownplace = oldplace;
-					var newplace = this.data[this.user].file + this.newrankright;
-					if (this.canMove(newplace)) {
-						// var payload = this.data[this.user];
-						// this.fire('premove', payload);
-						this.data[this.user].rank = this.newrankright;
-						this.$.firebase.commitProperty(this.user);
-					}
-				},
-				'40': function(){
-					console.log("down");
-					// console.log("file: " + this.data[this.user].file);
-					// console.log("rank: " + this.data[this.user].rank);
-					// console.log("file index after moving: " + this.newfiledown);
-					// console.log("file after moving: " + this.files[this.newfiledown]);
-					if (this.data[this.user].file === 'x') {
-						return false;
-					}
-					var oldplace = this.data[this.user].file + this.data[this.user].rank;
-					this.data[this.user].lastknownplace = oldplace;
-					var newplace = this.newfiledown + this.data[this.user].rank;
-					if (this.canMove(newplace)) {
-						// var payload = this.data[this.user];
-						// this.fire('premove', payload);
-						this.data[this.user].file = this.files[this.newfiledown];
-						this.$.firebase.commitProperty(this.user);
-					}
-				},
-			// },
+			'37': function(){
+				if (this.debug) { console.log("keyhandler: left");
+				console.log("file: " + this.data[this.user].file);
+				console.log("rank: " + this.data[this.user].rank);
+				console.log("rank after moving: " + this.newrankleft); }
+				if (this.data[this.user].rank === 0) {
+					return false;
+				}
+				var oldplace = this.data[this.user].file + this.data[this.user].rank;
+				this.data[this.user].lastknownplace = oldplace;
+				var newplace = this.data[this.user].file + this.newrankleft;
+				if (this.canMove(newplace)) {
+					this.data[this.user].rank = this.newrankleft;
+					this.$.firebase.commitProperty(this.user); 
+				}
+			},
+			'38': function(){
+				if (this.debug) { console.log("keyhandler: up");
+				console.log("file: " + this.data[this.user].file);
+				console.log("rank: " + this.data[this.user].rank);
+				console.log("file index after moving: " + this.newfileup);
+				console.log("file after moving: " + this.files[this.newfileup]); }
+				if (this.data[this.user].file === 'a') {
+					return false;
+				}
+				var oldplace = this.data[this.user].file + this.data[this.user].rank;
+				this.data[this.user].lastknownplace = oldplace;
+				var newplace = this.newfileup + this.data[this.user].rank;
+				if (this.canMove(newplace)) {
+					this.data[this.user].file = this.files[this.newfileup];
+					this.$.firebase.commitProperty(this.user);
+				}
+			},
+			'39': function(){
+				if (this.debug) { console.log("keyhandler: right");
+				console.log("file: " + this.data[this.user].file);
+				console.log("rank: " + this.data[this.user].rank);
+				console.log("rank after moving: " + this.newrankright); }
+				if (this.data[this.user].rank === 79) {
+					return false;
+				}
+				var oldplace = this.data[this.user].file + this.data[this.user].rank;
+				this.data[this.user].lastknownplace = oldplace;
+				var newplace = this.data[this.user].file + this.newrankright;
+				if (this.canMove(newplace)) {
+					this.data[this.user].rank = this.newrankright;
+					this.$.firebase.commitProperty(this.user);
+				}
+			},
+			'40': function(){
+				if (this.debug) { console.log("keyhandler: down");
+				console.log("file: " + this.data[this.user].file);
+				console.log("rank: " + this.data[this.user].rank);
+				console.log("file index after moving: " + this.newfiledown);
+				console.log("file after moving: " + this.files[this.newfiledown]); }
+				if (this.data[this.user].file === 'x') {
+					return false;
+				}
+				var oldplace = this.data[this.user].file + this.data[this.user].rank;
+				this.data[this.user].lastknownplace = oldplace;
+				var newplace = this.newfiledown + this.data[this.user].rank;
+				if (this.canMove(newplace)) {
+					this.data[this.user].file = this.files[this.newfiledown];
+					this.$.firebase.commitProperty(this.user);
+				}
+			},
+			'68': function(){
+				if (this.debug) {
+					this.debug = 0;
+					console.log('debug mode off');
+				} else {
+					this.debug = 1;
+					console.log('debug mode on');
+				}
+			},
 
 			canMove: function(newplace) {
 				if (this.occupied.indexOf(newplace) === -1) {
@@ -415,105 +404,50 @@
 					return false;
 				}
 			},
-				
-				// else {
-				// 	var newrankleft = this.newrankleft;
-				// 	var newfileup = this.newfileup;
-				// 	var newrankright = this.newrankright;
-				// 	var newfiledown = this.newfiledown;
-				// 	var collisionHandler = {
-				// 		'left': function() {
-				// 			if (newrankleft >= 0) {
-				// 				return false;
-				// 			}
-				// 		},
-				// 		'up': function() {
-				// 			if (newfileup >= 0) {
-				// 				return false;
-				// 			}
-				// 		}, 
-				// 		'right': function() {
-				// 			if (newrankright >= 80) {
-				// 				return false;
-				// 			}
-				// 		},
-				// 		'down': function() {
-				// 			if (newfiledown >= 24) {
-				// 				return false;
-				// 			}
-				// 		}
-				// 	};
-				// 	if (collisionHandler[direction]) {
-				// 		(collisionHandler[direction]);
-				// 	} else {
-				// 		return true;
-				// 	}
-				// }
-		
-					// I could have done this with keys on a POJO like Jan Hein suggested
-					// I do for the arrow key handlers, but after the grief that gave me
-					// trying to get it to respond to the correct scope (and taking into account
-					// the possibility that I might need to declare ie. 'left' on my Polymer()
-					// object before I'm done) there's no way in hell I'm doing that shit
-					// intentionally ever again within a Polymer element.
-					// notional hierarchy of multi-conditionals:
-					// POJOkeys > else ifs > switch/case
-
+			
 			clickChar: function(el) {
-				// console.log(el.toElement.id);
-				// console.log (el.toElement.className);
-				if (el.toElement.className == "possiblechar selected") { // check if the clicked element is selected
+				if (this.debug) { console.log("function clickChar: " + el.toElement.id);
+				console.log (el.toElement.className); }
+				if (el.toElement.className == "possiblechar selected") {
 					return false;
 				} else {
-					var clickedId = "#" + el.toElement.id; // get selectable string of templated ID
-					var queried = this.shadowRoot;		// dump this shit
-					var resource = this.characters;		// into variables
-					var preselect = "";					// outside the scope of the for loop
-					// console.log(this.shadowRoot.querySelector(clickedId).className);
-					// console.log(this.shadowRoot.querySelectorAll(".possiblechar").array());
-					// console.log(this.characters);
-					for (var i = 0; i < resource.length; i++) { // reset all classnames to just "possiblechar"
-						// console.log(queried.querySelector(".possiblechar"));
+					var clickedId = "#" + el.toElement.id;
+					var queried = this.shadowRoot;
+					var resource = this.characters;
+					var preselect = "";
+					if (this.debug) { console.log("function clickChar: " + this.shadowRoot.querySelector(clickedId).className);
+					console.log(this.shadowRoot.querySelectorAll(".possiblechar").array());
+					console.log(this.characters); }
+					for (var i = 0; i < resource.length; i++) {
+						if (this.debug) { console.log("function clickChar: " + queried.querySelector(".possiblechar")); }
 						var itr = "#" + resource[i].name;
-						// console.log(itr);
+						if (this.debug) { console.log("function clickChar: " + itr); }
 						queried.querySelector(itr).className = "possiblechar";
 					}
-					var clicked = this.shadowRoot.querySelector(clickedId); // query clicked element using string
-					clicked.className = clicked.className + " selected"; // add "selected" to queried el's class
-					var slicedId = clickedId.substring(1); // shave off the # again
-					for (var j = 0; j < resource.length; j++) { // look through the list for the appropriate char
-						if (resource[j].name == slicedId) { // (necessary because of the id/selector clusterfuck)
-							preselect = resource[j].chr; // this seems inelegant somehow though
+					var clicked = this.shadowRoot.querySelector(clickedId);
+					clicked.className = clicked.className + " selected";
+					var slicedId = clickedId.substring(1);
+					for (var j = 0; j < resource.length; j++) {
+						if (resource[j].name == slicedId) {
+							preselect = resource[j].chr;
 						}
 					}
-					this.selectedChar = preselect; // tell Polymer about it
-					// console.log(this.selectedChar);
-					// console.log(this.shadowRoot.querySelector(clickedId).className);
+					this.selectedChar = preselect;
+					if (this.debug) { console.log("function clickChar: " + this.selectedChar);
+					console.log(this.shadowRoot.querySelector(clickedId).className); }
 				}
 			},
 
 			fadeOthers: function(e){
-				// console.log(e.toElement.id);
-				// var payloadId = e.toElement.id;
-				// var clickedId = "#" + payloadId;
-				// console.log(clickedId);
-				// var queriedNode = this.shadowRoot;
-				// console.log(queriedNode.querySelector(clickedId));
-				// console.log(queriedNode.getElementById(clickedId));
-				// this and clickChar could potentially be refactored into a single click handler
-				// but initial experience seems to suggest that would result in scope problems.
-				// I blame Polymer. 
+				if (this.debug) { console.log("function fadeOthers: " + e.toElement.id); }
 				var resource = this.palette;
-				// console.log(resource);
+				if (this.debug) { console.log("function fadeOthers: " + resource); }
 				for (var k = 0; k < this.palette.length; k++){
-					// var itr = "#" + this.palette[k];
-					// console.log("setting " + itr + " to 0.3");
 					this.shadowRoot.getElementById(this.palette[k]).style.opacity=0.3;
-					// queriedEl.style.color=resource[k];
 				}
 				this.shadowRoot.getElementById(e.toElement.id).style.opacity=1;
 				this.selectedColor = e.toElement.id;
-				// console.log(this.selectedColor);
+				if (this.debug) { console.log("function fadeOthers: " + this.selectedColor); }
 			},
 
 			randomPlace: function() {
@@ -536,7 +470,7 @@
 					return false;
 				} else {
 					this.lastknownkeys = this.keys;
-					console.log(this.lastknownkeys);
+					if (this.debug) { console.log("function sendChar: " + this.lastknownkeys); }
 					var startplace = this.randomPlace();
 					var startfile = startplace.substring(0,1);
 					var startrank = startplace.substring(1);
@@ -550,10 +484,6 @@
 					});
 				}
 				this.shadowRoot.querySelector("#userconfig").style.display="none";
-				// after dicking around for way too long trying to register a user and make sure there was only 1
-				// I realized "I am thinking about this from the wrong end of the process" - 
-				// there's no need to check unity programmatically if I just disable the user's ability to
-				// create more characters after they create their first one.
 			},
 
 			dataChange: function() {
@@ -563,10 +493,6 @@
 					if (this.data[this.user]) {
 						var place = this.data[this.user].file + this.data[this.user].rank;
 						console.log("your position is " + place);
-						// convert file to number
-						// then increment/decrement everything
-						// i'm an asshole and forgot that the numbers are INTEGERS
-						// and therefore I didn't have to re-get indexOf when moving.
 						var filenum = this.files.indexOf(this.data[this.user].file)
 						this.newfiledown = filenum;
 						this.newfiledown++;
@@ -581,33 +507,22 @@
 			},
 
 			childAdded: function(e){
-				if (this.user == "") { // how the seven hells did it take me this long 
+				if (this.user == "") {
 					this.user = e.detail.name;
 					console.log('you have been assigned uID ' + this.user);
 				}
 				var place = '#' + e.detail.value.file + e.detail.value.rank;
 				var child = this.shadowRoot.querySelector(place);
-				// console.log('placing ' + e.detail.value.chr + ' at ' + place);
 				child.innerHTML = e.detail.value.chr;
 				child.style.color=e.detail.value.clr;
 				this.occupied.push(place.substring(1));
 				console.log("user " + e.detail.value.name + " has entered the room at " + place.substring(1));
-				// totally violating DRY here but IDGAF tbqh
 				var strungUID = "data." + e.detail.name;
 				this.observe[strungUID] = 'dataChange';
 			},
 
-			// aboutToMove: function(e){
-			// 	var oldplace = this.data[e.detail.name].file + this.data[e.detail.name].rank;
-			// 	console.log("about to move");
-			// 	console.log("old place: " + oldplace)
-				// TODO: grab old place data
-				// grab new place data (innerHTML of new place data is necessarily " ")
-				// switch the two around
-			// },
-
 			childChanged: function(e) {
-				// console.log(e);
+				if (this.debug) { console.log("function childChanged: " + e); }
 				var chr = e.detail.value.chr;
 				var clr = e.detail.value.clr;
 				var oldplace = e.detail.value.lastknownplace;
@@ -618,7 +533,7 @@
 			},
 
 			childRemoved: function(e) {
-				// console.log(e);
+				if (this.debug) { console.log("function childRemoved: " + e); }
 				var place = e.detail.value.file + e.detail.value.rank;
 				this.occupied.splice(this.occupied.indexOf(place), 1);
 				this.shadowRoot.getElementById(place).innerHTML = this.space;
@@ -628,16 +543,12 @@
 			},
 
 			displayUpdate: function(oldplace, newplace, chr, clr) {
-				// console.log("old place: " + this.shadowRoot.getElementById(oldplace).innerHTML);
+				if (this.debug) { console.log("function displayUpdate: old place: " + this.shadowRoot.getElementById(oldplace).innerHTML); }
 				this.shadowRoot.getElementById(oldplace).innerHTML = this.space;
-				// console.log("new place: " + this.shadowRoot.getElementById(newplace).innerHTML);
+				if (this.debug) { console.log("function displayUpdate: new place: " + this.shadowRoot.getElementById(newplace).innerHTML); }
 				this.shadowRoot.getElementById(newplace).innerHTML = chr;
 				this.shadowRoot.getElementById(newplace).style.color = clr;
 			}
-		});
-
-		// currently: only the first user to join a space is moved - this may be a function of working
-		// from a single computer, need to test on separate ones to be sure.
-		
+		});		
 	</script>
 </polymer-element>
