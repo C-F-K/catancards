@@ -72,8 +72,8 @@
 								location="https://discount-app.firebaseio.com/" 
 								data="{{data}}" 
 								keys="{{keys}}"
-								log
-								childEvents								
+								log="{{firebaseLog}}"
+								childEvents="{{firebaseChildEvents}}"								
 								on-data-change={{dataChange}}
 								on-child-added={{childAdded}}
 								on-child-changed={{childChanged}}
@@ -114,6 +114,8 @@
 		Polymer('discount-room', {
 			readyFlag: 0,
 			debug: 0,
+			firebaseLog: false,
+			firebaseChildEvents: false;
 			observe: {
 			},
 			characters: [
@@ -390,9 +392,13 @@
 			'68': function(){
 				if (this.debug) {
 					this.debug = 0;
+					this.firebaseLog = false;
+					this.firebaseChildEvents = false;
 					console.log('debug mode off');
 				} else {
 					this.debug = 1;
+					this.firebaseLog = true;
+					this.firebaseChildEvents = true;
 					console.log('debug mode on');
 				}
 			},
