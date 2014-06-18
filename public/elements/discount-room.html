@@ -112,8 +112,8 @@
 	</template>
 	<script>
 		Polymer('discount-room', {
-			debug: 0,
 			readyFlag: 0,
+			debug: 0,
 			observe: {
 			},
 			characters: [
@@ -332,7 +332,7 @@
 				var oldplace = this.data[this.user].file + this.data[this.user].rank;
 				this.data[this.user].lastknownplace = oldplace;
 				var newplace = this.data[this.user].file + this.newrankleft;
-				if (this.canMove(newplace)) {
+				if (this.noCollision(newplace)) {
 					this.data[this.user].rank = this.newrankleft;
 					this.$.firebase.commitProperty(this.user); 
 				}
@@ -349,7 +349,7 @@
 				var oldplace = this.data[this.user].file + this.data[this.user].rank;
 				this.data[this.user].lastknownplace = oldplace;
 				var newplace = this.newfileup + this.data[this.user].rank;
-				if (this.canMove(newplace)) {
+				if (this.noCollision(newplace)) {
 					this.data[this.user].file = this.files[this.newfileup];
 					this.$.firebase.commitProperty(this.user);
 				}
@@ -365,7 +365,7 @@
 				var oldplace = this.data[this.user].file + this.data[this.user].rank;
 				this.data[this.user].lastknownplace = oldplace;
 				var newplace = this.data[this.user].file + this.newrankright;
-				if (this.canMove(newplace)) {
+				if (this.noCollision(newplace)) {
 					this.data[this.user].rank = this.newrankright;
 					this.$.firebase.commitProperty(this.user);
 				}
@@ -382,7 +382,7 @@
 				var oldplace = this.data[this.user].file + this.data[this.user].rank;
 				this.data[this.user].lastknownplace = oldplace;
 				var newplace = this.newfiledown + this.data[this.user].rank;
-				if (this.canMove(newplace)) {
+				if (this.noCollision(newplace)) {
 					this.data[this.user].file = this.files[this.newfiledown];
 					this.$.firebase.commitProperty(this.user);
 				}
@@ -397,13 +397,17 @@
 				}
 			},
 
-			canMove: function(newplace) {
+			noCollision: function(newplace) {
 				if (this.occupied.indexOf(newplace) === -1) {
 					return true;
 				} else {
 					return false;
 				}
 			},
+
+			// when extending to multiplayer roguelike: 
+			//		add function here to do combat
+			//		called from keyhandler when noCollision returns false.
 			
 			clickChar: function(el) {
 				if (this.debug) { console.log("function clickChar: " + el.toElement.id);
