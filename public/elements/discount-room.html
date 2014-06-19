@@ -271,9 +271,6 @@
 				this.styleColorDivs();
 				var boundOnKeyUp = this.onKeyUp.bind(this);
 				var boundUserLeaves = this.userLeaves.bind(this);
-				// var self = this;
-				// var boundOnKeyUp = self.onKeyUp;
-				// var boundUserLeaves = self.userLeaves;
 				window.addEventListener("keyup", boundOnKeyUp, false);
 				window.addEventListener("unload", boundUserLeaves, false);
 				setInterval(this.screenScrub(), 3000);
