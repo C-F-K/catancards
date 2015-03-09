@@ -1,17 +1,8 @@
 body {
-	font-family:courier;
-	color:white;
-	background-color: black;
-    height: 100%;
-    margin: 0;
-    padding: 0; 
+	background-color: #BEB273;
+	font-family: Georgia;
 }
 
 h1, h2, h3 {
     text-align: center;
-}
-
-spoiler-alert {
-	text-align:center;
-	margin: 0px auto 0px auto;
 }
