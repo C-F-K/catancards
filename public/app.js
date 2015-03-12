@@ -204,7 +204,6 @@ function renderCard(obj) {
         } else {
             var resultSize = ((14 - num) * 5) * 2;
         }
-        var resultString = resultSize.toString() + "px";
         return resultSize.toString() + "px";
     });
     if (obj.number == "6" || obj.number == "8") {
