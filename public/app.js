@@ -73,27 +73,27 @@ var cards =  [
 // 6x 7 (robbery)
     {
         number: "7",
-        title: "ROBERY",
+        title: "ROBBERY",
         text: "Each player with more than 7 resources (C&K: or commodities) discards half rounded down. The player who drew this card may move the robber and steal a card from a player with a settlement adjacent to its new hex."
     },{
         number: "7",
-        title: "ROBERY",
+        title: "ROBBERY",
         text: "Each player with more than 7 resources (C&K: or commodities) discards half rounded down. The player who drew this card may move the robber and steal a card from a player with a settlement adjacent to its new hex."
     },{
         number: "7",
-        title: "ROBERY",
+        title: "ROBBERY",
         text: "Each player with more than 7 resources (C&K: or commodities) discards half rounded down. The player who drew this card may move the robber and steal a card from a player with a settlement adjacent to its new hex."
     },{
         number: "7",
-        title: "ROBERY",
+        title: "ROBBERY",
         text: "Each player with more than 7 resources (C&K: or commodities) discards half rounded down. The player who drew this card may move the robber and steal a card from a player with a settlement adjacent to its new hex."
     },{
         number: "7",
-        title: "ROBERY",
+        title: "ROBBERY",
         text: "Each player with more than 7 resources (C&K: or commodities) discards half rounded down. The player who drew this card may move the robber and steal a card from a player with a settlement adjacent to its new hex."
     },{
         number: "7",
-        title: "ROBERY",
+        title: "ROBBERY",
         text: "Each player with more than 7 resources (C&K: or commodities) discards half rounded down. The player who drew this card may move the robber and steal a card from a player with a settlement adjacent to its new hex."
     },
 // 5x 8 (1x epidemic)
