@@ -38,7 +38,7 @@ var cards =  [
     },{
         number: "5",
         title: "TOURNEY",
-        text: "The player with the most played Knight cards (C&K: most active knights) may take a resource of their choice."
+        text: "The single player with the most played Knight cards (C&K: most active knights) may take a resource of their choice."
     },{
         number: "5",
         title: "LIFE GOES ON",
@@ -122,7 +122,7 @@ var cards =  [
     {
         number: "9",
         title: "CALM WATER",
-        text: "The player with the most settlements adjacent to harbors may take a resource of their choice."
+        text: "The single player with the most settlements adjacent to harbors may take a resource of their choice."
     },{
         number: "9",
         title: "LIFE GOES ON",
@@ -140,7 +140,7 @@ var cards =  [
     {
         number: "10",
         title: "ALMS",
-        text: "The player with the most Victory Points chooses a card to give a player with the least Victory Points."
+        text: "The single player with the most Victory Points chooses a card to give a player with the least Victory Points."
     },{
         number: "10",
         title: "LIFE GOES ON",
@@ -154,7 +154,7 @@ var cards =  [
     {
         number: "11",
         title: "ALMS",
-        text: "The player with the most Victory Points chooses a card to give a player with the least Victory Points."
+        text: "The single player with the most Victory Points chooses a card to give a player with the least Victory Points."
     },{
         number: "11",
         title: "LIFE GOES ON",
