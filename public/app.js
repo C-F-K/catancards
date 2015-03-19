@@ -164,7 +164,7 @@ var cards =  [
     {
         number: "12",
         title: "CALM WATER",
-        text: "The player with the most settlements adjacent to harbors may take a resource of their choice."
+        text: "The single player with the most settlements adjacent to harbors may take a resource of their choice."
     }
 // 1x new year -> emulated by the subsetter/queue
 ];
