@@ -20,7 +20,7 @@ h1, h2, h3, p {
 .number p {
     position: relative;
     top: 50%;
-    transform: translateY(-75%);
+    transform: translateY(-50%);
 }
 
 footer {
